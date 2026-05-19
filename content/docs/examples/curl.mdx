@@ -1,3 +1,8 @@
+---
+title: cURL Examples
+description: Quick command-line examples using curl for the Glowey API.
+---
+
 # cURL Examples
 
 Quick command-line examples using `curl`.
@@ -297,7 +302,7 @@ TASK_ID="task_abc123xyz"
 
 echo "Polling for completion..."
 while true; do
-  STATUS=$(curl -s https://glowey.app/api/generate/status?taskId=$TASK_ID \
+  STATUS=$(curl -s "https://glowey.app/api/generate/status?taskId=$TASK_ID" \
     -H "Authorization: Bearer $TOKEN" | jq -r '.state')
   
   echo "Status: $STATUS"
@@ -310,7 +315,7 @@ while true; do
 done
 
 # Get the final result
-curl -s https://glowey.app/api/generate/status?taskId=$TASK_ID \
+curl -s "https://glowey.app/api/generate/status?taskId=$TASK_ID" \
   -H "Authorization: Bearer $TOKEN" | jq '.output.images[0].url'
 ```
 
@@ -323,8 +328,7 @@ curl -s https://glowey.app/api/generate/status?taskId=$TASK_ID \
 ```bash
 curl -w "\nHTTP Status: %{http_code}\n" \
   https://glowey.app/api/generate \
-  -H "Authorization: Bearer glow_sk_YOUR_TOKEN_HERE" \
-  ...
+  -H "Authorization: Bearer glow_sk_YOUR_TOKEN_HERE"
 ```
 
 ### Insufficient Credits (402)

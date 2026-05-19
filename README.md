@@ -1,73 +1,73 @@
-# Glowey Developer API
+# Glowey Developer API Docs
 
-The Glowey API lets developers integrate AI-powered creative generation into their apps. Generate images, videos, audio, music, and more—each request deducts credits from the authenticated token owner's Glowey subscription.
+Documentation site for the [Glowey](https://glowey.app) Developer API — the all-in-one AI creative platform.
 
-## Quick Start
+Built with [Fumadocs](https://fumadocs.vercel.app) on Next.js + Tailwind CSS v4.
 
-1. **Get a token:** Sign in at [glowey.app](https://glowey.app) → Settings → Developer API. Create a token and copy it immediately (never shown again).
+## Development
 
-2. **Make a request:**
+```bash
+pnpm install
+pnpm dev
+```
 
-   ```bash
-   curl -X POST https://glowey.app/api/generate \
-     -H "Authorization: Bearer glow_sk_YOUR_TOKEN_HERE" \
-     -H "Content-Type: application/json" \
-     -d '{
-       "modelId": "flux-pro",
-       "prompt": "a serene lake at sunset",
-       "resolution": "1K"
-     }'
-   ```
+Open [http://localhost:3000](http://localhost:3000).
 
-3. **Poll for results:** Use the `taskId` returned above with the status endpoint (documented per feature).
+## Build
 
-## Key Concepts
+```bash
+pnpm build
+```
 
-- **Authentication:** Include `Authorization: Bearer glow_sk_YOUR_TOKEN_HERE` on every request.
-- **Credits:** Each call costs credits (see [./docs/credits-and-pricing.md](./docs/credits-and-pricing.md)). Insufficient credits → 402 response.
-- **Rate Limiting:** 60 requests per minute per token (env-configurable).
-- **Async Tasks:** Image, video, lipsync, and music use taskId polling. Chat and audio tools are sync or streaming.
+## Deploy
 
-## Features
+Deploy on [Vercel](https://vercel.com) — no configuration needed. Framework is detected as Next.js automatically.
 
-### Generation (Async)
-- **[Images](./docs/endpoints/image.md)** – Text-to-image, image-to-image
-- **[Videos](./docs/endpoints/video.md)** – Text-to-video, image-to-video
-- **[Lipsync](./docs/endpoints/lipsync.md)** – Sync audio to avatars
-- **[Music](./docs/endpoints/music.md)** – Suno music generation + post-processing tools
+1. Import this repo into Vercel
+2. Vercel auto-detects Next.js and runs `pnpm build`
+3. Done
 
-### Chat & LLM
-- **[Chat](./docs/endpoints/chat.md)** – Multi-model LLM streaming with tool use (web search, image generation, memory)
+## Tech Stack
 
-### Audio
-- **[Audio Tools](./docs/endpoints/audio-tools.md)** – Sound effects, voice cloning, transcription, TTS
-- **[Suno Tools](./docs/endpoints/suno-tools.md)** – Music post-processing (lyrics, extend, stems, cover, etc.)
+- **Framework:** Next.js 15 (App Router)
+- **Docs framework:** Fumadocs UI + fumadocs-mdx
+- **Styling:** Tailwind CSS v4
+- **Language:** TypeScript
+- **Package manager:** pnpm
+- **Content:** MDX files in `content/docs/`
 
-### Edit
-- **[Image Edit](./docs/endpoints/edit.md)** – Enhance, remove background, inpaint, expand
+## Content Structure
 
-## Guides
+```
+content/docs/
+├── index.mdx               # Introduction
+├── authentication.mdx
+├── rate-limits.mdx
+├── errors.mdx
+├── credits-and-pricing.mdx
+├── endpoints/
+│   ├── image.mdx
+│   ├── video.mdx
+│   ├── lipsync.mdx
+│   ├── music.mdx
+│   ├── chat.mdx
+│   ├── audio-tools.mdx
+│   ├── suno-tools.mdx
+│   └── edit.mdx
+└── examples/
+    ├── nodejs.mdx
+    ├── python.mdx
+    └── curl.mdx
+```
 
-- [Authentication](./docs/authentication.md) – Bearer tokens, error codes
-- [Rate Limiting](./docs/rate-limits.md) – Quotas and backoff
-- [Error Responses](./docs/errors.md) – 401, 402, 429, 500
-- [Credits & Pricing](./docs/credits-and-pricing.md) – Per-model cost tables
+## API Base URL
 
-## Examples
+All Glowey API endpoints are at `https://glowey.app/api/`.
 
-- [Node.js / JavaScript](./docs/examples/nodejs.md)
-- [Python](./docs/examples/python.md)
-- [cURL](./docs/examples/curl.md)
+Get a token at [glowey.app/me/settings](https://glowey.app/me/settings) → Developer API.
 
-## API Base
+## Links
 
-All endpoints are at `https://glowey.app/api/`
-
-## Help
-
-For issues, feature requests, or questions, [open an issue on GitHub](https://github.com/glowey/api).
-
----
-
-**Status:** Production  
-**Last Updated:** 2025-05-19
+- [Glowey App](https://glowey.app)
+- [API Settings](https://glowey.app/me/settings)
+- [GitHub Issues](https://github.com/arielaizn/Glowey-Developers-Docs/issues)

@@ -1,3 +1,8 @@
+---
+title: Music Generation
+description: Generate original music with Suno, including post-processing tools for lyrics, extend, stems, and more.
+---
+
 # Music Generation
 
 Generate original music with Suno, plus post-processing tools (lyrics, extend, stems, etc.).
@@ -24,10 +29,10 @@ Bearer token required.
 | `title` | string | No | Song title (custom mode). Auto-generated from prompt if omitted |
 | `negativeTags` | string | No | Styles to avoid. E.g., "vocals, drums" |
 | `vocalGender` | string | No | Vocal gender: `m` (male) or `f` (female). Ignored if instrumental |
-| `styleWeight` | number | No | Style strength: 0–1. Default: 0.7 |
-| `weirdnessConstraint` | number | No | Creativity limit: 0–1. Higher = more experimental. Default: 0.5 |
-| `audioWeight` | number | No | Audio reference strength: 0–1 (when using audio reference) |
-| `personaId` | string | No | Persona ID (V5/V5_5 only). Available from [glowey.app/me/suno](https://glowey.app/me/suno) |
+| `styleWeight` | number | No | Style strength: 0-1. Default: 0.7 |
+| `weirdnessConstraint` | number | No | Creativity limit: 0-1. Higher = more experimental. Default: 0.5 |
+| `audioWeight` | number | No | Audio reference strength: 0-1 (when using audio reference) |
+| `personaId` | string | No | Persona ID (V5/V5_5 only). Available from glowey.app/me/suno |
 | `personaModel` | string | No | Persona voice model: `V5` or `V5_5` |
 
 ### Response
@@ -44,7 +49,7 @@ Bearer token required.
 
 ### Credit Cost
 
-Fixed per model version. See [../credits-and-pricing.md#music-generation](../credits-and-pricing.md#music-generation).
+Fixed per model version. See [Credits & Pricing](/docs/credits-and-pricing#music-generation).
 
 - Suno V4.x: 15 credits
 - Suno V5.x: 20 credits
@@ -163,20 +168,20 @@ curl "https://glowey.app/api/audio/music/status?taskId=task_mus890ghi" \
 ### Polling Strategy
 
 1. Submit music request → get `taskId`
-2. Poll every 5–10 seconds
+2. Poll every 5-10 seconds
 3. When `state` is `success` or `fail`, stop
 4. Download audio from `output.audio_url`
 
 ### Typical Time to Completion
 
-- V4/V4.5: 30–120 seconds
-- V5/V5.5: 60–180 seconds
+- V4/V4.5: 30-120 seconds
+- V5/V5.5: 60-180 seconds
 
 ---
 
 ## Suno Post-Processing Tools
 
-See [./suno-tools.md](./suno-tools.md) for:
+See [Suno Tools](/docs/endpoints/suno-tools) for:
 
 - **Lyrics** – Generate or enhance song lyrics
 - **Extend** – Extend music length

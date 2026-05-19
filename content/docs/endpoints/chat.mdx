@@ -1,3 +1,8 @@
+---
+title: Chat (LLM)
+description: Stream multi-turn conversations with Claude, GPT, and Gemini models. Supports tool use, web search, and memory.
+---
+
 # Chat (LLM)
 
 Stream multi-turn conversations with various LLM models. Supports tool use, web search, and memory.
@@ -17,7 +22,7 @@ Bearer token required.
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | `model` | string | Yes | Model ID: `claude-opus-4-7`, `claude-sonnet-4-6`, `claude-haiku-4-5`, `gemini-3.1-pro`, `gemini-3-pro`, `gemini-3-flash`, `gemini-2.5-pro`, `gemini-2.5-flash`, `gpt-5-5`, `gpt-5-4`, `gpt-5-2` |
-| `messages` | object[] | Yes | Message history. Array of `{ role: "user" \| "assistant", content: string \| ContentPart[] }` |
+| `messages` | object[] | Yes | Message history. Array of `{ role: "user" or "assistant", content: string or ContentPart[] }` |
 | `max_tokens` | number | No | Max output tokens. Default: 4096. Max: 16384 |
 | `systemPrompt` | string | No | Custom system message (prepended to model's defaults) |
 | `webSearch` | boolean | No | Enable web search (costs +2 credits). Default: false |
@@ -155,7 +160,7 @@ while (true) {
         const json = JSON.parse(line.slice(6));
         const text = json.choices?.[0]?.delta?.content || '';
         fullText += text;
-        console.log(text); // Print chunk live
+        console.log(text);
       } catch { /* skip */ }
     }
   }
@@ -214,7 +219,7 @@ print('\n\nFinal response:', full_text)
 ## Tips
 
 - **Streaming:** Always use SSE parsing for live UI updates
-- **Web Search:** Adds latency (5–10s) but gives current info
+- **Web Search:** Adds latency (5-10s) but gives current info
 - **Tools:** Enable `generate_image` to let the model create images mid-conversation
-- **Context:** Keep messages < 100k tokens for fastest response
+- **Context:** Keep messages under 100k tokens for fastest response
 - **Max Tokens:** 16384 is the ceiling; higher = slower response

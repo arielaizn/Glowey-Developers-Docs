@@ -1,0 +1,17 @@
+@import 'fumadocs-ui/style.css';
+
+@layer utilities {
+  .hero-gradient {
+    background: radial-gradient(ellipse at 50% 0%, rgba(255, 107, 53, 0.15) 0%, transparent 70%);
+  }
+}
+
+:root {
+  --color-fd-primary: #FF6B35;
+  --color-fd-primary-foreground: #ffffff;
+}
+
+.dark {
+  --color-fd-primary: #FF6B35;
+  --color-fd-primary-foreground: #ffffff;
+}

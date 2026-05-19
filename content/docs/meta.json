@@ -1,0 +1,14 @@
+{
+  "title": "Glowey API",
+  "pages": [
+    "index",
+    "authentication",
+    "rate-limits",
+    "errors",
+    "credits-and-pricing",
+    "---",
+    "endpoints",
+    "---",
+    "examples"
+  ]
+}

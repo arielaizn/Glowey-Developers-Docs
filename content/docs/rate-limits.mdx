@@ -1,3 +1,8 @@
+---
+title: Rate Limiting
+description: API rate limits, retry behavior, and best practices for the Glowey API.
+---
+
 # Rate Limiting
 
 All API endpoints are rate-limited per token to ensure fair resource allocation.
@@ -45,7 +50,7 @@ Headers included in 429 responses:
 
 | Header | Value |
 |--------|-------|
-| `Retry-After` | Seconds until bucket rolls over (0–59) |
+| `Retry-After` | Seconds until bucket rolls over (0-59) |
 | `X-RateLimit-Limit` | 60 |
 | `X-RateLimit-Remaining` | 0 |
 

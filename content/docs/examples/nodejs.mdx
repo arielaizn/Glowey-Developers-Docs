@@ -1,3 +1,8 @@
+---
+title: Node.js / JavaScript Examples
+description: Complete Node.js and JavaScript examples using fetch and axios for the Glowey API.
+---
+
 # JavaScript / Node.js Examples
 
 Complete examples using `fetch` (Node 18+) and `axios`.
@@ -126,9 +131,11 @@ async function generateImage() {
 
   // Poll
   let state = 'pending';
+  let status;
   while (state === 'pending') {
     await new Promise(r => setTimeout(r, 2000));
-    const { data: status } = await client.get(`/generate/status?taskId=${taskId}`);
+    const { data } = await client.get(`/generate/status?taskId=${taskId}`);
+    status = data;
     state = status.state;
     console.log(`Status: ${state}`);
   }
@@ -170,13 +177,14 @@ async function generateVideo() {
 
   // Poll (every 5 seconds)
   let done = false;
+  let status;
   while (!done) {
     await new Promise(r => setTimeout(r, 5000));
     const statusRes = await fetch(
       `https://glowey.app/api/video/status?taskId=${taskId}`,
       { headers: { 'Authorization': `Bearer ${token}` } }
     );
-    const status = await statusRes.json();
+    status = await statusRes.json();
     done = status.state !== 'pending';
     console.log('Status:', status.state);
   }
@@ -319,13 +327,14 @@ async function generateMusic() {
 
   // Poll (every 10 seconds)
   let done = false;
+  let status;
   while (!done) {
     await new Promise(r => setTimeout(r, 10000));
     const statusRes = await fetch(
       `https://glowey.app/api/audio/music/status?taskId=${taskId}`,
       { headers: { 'Authorization': `Bearer ${token}` } }
     );
-    const status = await statusRes.json();
+    status = await statusRes.json();
     done = status.state !== 'pending';
     console.log('Status:', status.state);
   }
@@ -373,7 +382,7 @@ async function fetchWithRetry(url, options, maxRetries = 3) {
     } catch (err) {
       lastError = err;
       if (attempt < maxRetries - 1) {
-        const wait = 2 ** attempt; // exponential backoff
+        const wait = 2 ** attempt;
         console.log(`Attempt ${attempt + 1} failed. Waiting ${wait}s...`);
         await new Promise(r => setTimeout(r, wait * 1000));
       }
@@ -508,11 +517,11 @@ async function generateImage(req: GenerateRequest): Promise<string> {
   let status: StatusResponse;
   do {
     await new Promise(r => setTimeout(r, 2000));
-    const res = await fetch(
+    const statusRes = await fetch(
       `https://glowey.app/api/generate/status?taskId=${taskId}`,
       { headers: { 'Authorization': `Bearer glow_sk_YOUR_TOKEN_HERE` } }
     );
-    status = await res.json();
+    status = await statusRes.json();
   } while (status.state === 'pending');
 
   if (status.state === 'fail') throw new Error(status.error);

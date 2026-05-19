@@ -1,0 +1,13 @@
+{
+  "title": "Endpoints",
+  "pages": [
+    "image",
+    "video",
+    "lipsync",
+    "music",
+    "chat",
+    "audio-tools",
+    "suno-tools",
+    "edit"
+  ]
+}

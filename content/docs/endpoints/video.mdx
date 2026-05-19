@@ -1,3 +1,8 @@
+---
+title: Video Generation
+description: Generate videos from text, images, or reference videos using the Glowey API.
+---
+
 # Video Generation
 
 Generate videos from text, images, or reference videos.
@@ -18,7 +23,7 @@ Bearer token required.
 |-----------|------|----------|-------------|
 | `modelId` | string | Yes | Model ID (e.g., `seedance-2-fast`, `kling-3`, `veo-3`) |
 | `prompt` | string | Conditional | Text description. Required unless using motion control |
-| `duration` | number | No | Video length in seconds. Default: 5. Range: 4–15 depending on model |
+| `duration` | number | No | Video length in seconds. Default: 5. Range: 4-15 depending on model |
 | `resolution` | string | No | Quality: `480p`, `720p`, `1080p`, `4K`, or `pro` (Kling). Default: `720p` |
 | `aspectRatio` | string | No | Aspect ratio: `1:1`, `16:9`, `9:16`. Default: `16:9` |
 | `audioOn` | boolean | No | Include generated audio (some models). Default: false |
@@ -47,9 +52,9 @@ Bearer token required.
 
 ### Credit Cost
 
-Varies by model, duration, and resolution. See [../credits-and-pricing.md#video-generation](../credits-and-pricing.md#video-generation).
+Varies by model, duration, and resolution. See [Credits & Pricing](/docs/credits-and-pricing#video-generation).
 
-Example: Seedance 2.0 Fast, 5s, 720p = (12 + 5×3) × 1.25 = 57 credits.
+Example: Seedance 2.0 Fast, 5s, 720p = (12 + 5x3) x 1.25 = 57 credits.
 
 ### Errors
 
@@ -152,22 +157,22 @@ curl "https://glowey.app/api/video/status?taskId=task_h4i5j6k7" \
 ### Polling Strategy
 
 1. Submit video request → get `taskId`
-2. Poll every 5–10 seconds
+2. Poll every 5-10 seconds
 3. When `state` is `success` or `fail`, stop
 4. Download video from `output.video_url`
 
 ### Typical Time to Completion
 
-- Seedance 2.0 Fast: 15–30 seconds
-- Seedance 2.0: 30–60 seconds
-- Kling 3.0: 20–40 seconds
-- Veo 3.1: 30–90 seconds (longer due to quality)
+- Seedance 2.0 Fast: 15-30 seconds
+- Seedance 2.0: 30-60 seconds
+- Kling 3.0: 20-40 seconds
+- Veo 3.1: 30-90 seconds (longer due to quality)
 
 ---
 
 ## Supported Models
 
-See [../credits-and-pricing.md#video-generation](../credits-and-pricing.md#video-generation) for complete list.
+See [Credits & Pricing](/docs/credits-and-pricing#video-generation) for complete list.
 
 Popular models:
 - `seedance-2-fast` – Fast, budget-friendly

@@ -1,3 +1,8 @@
+---
+title: Suno Post-Processing Tools
+description: Advanced music editing and enhancement tools for Suno-generated music.
+---
+
 # Suno Post-Processing Tools
 
 Advanced music editing and enhancement tools for Suno-generated music.
@@ -53,7 +58,8 @@ Response:
 }
 ```
 
-Cost: 10 credits  
+Cost: 10 credits
+
 Poll: `GET /api/audio/suno/extend/status?taskId=...`
 
 ---
@@ -107,7 +113,8 @@ Response:
 }
 ```
 
-Cost: 12 credits  
+Cost: 12 credits
+
 Poll: `GET /api/audio/suno/cover/status?taskId=...`
 
 ---
@@ -135,7 +142,8 @@ Response:
 }
 ```
 
-Cost: 20 credits  
+Cost: 20 credits
+
 Poll: `GET /api/audio/suno/music-video/status?taskId=...`
 
 ---
@@ -163,7 +171,8 @@ Response:
 }
 ```
 
-Cost: 10 credits  
+Cost: 10 credits
+
 Poll: `GET /api/audio/suno/replace-section/status?taskId=...`
 
 ---
@@ -190,7 +199,8 @@ Response:
 }
 ```
 
-Cost: 8 credits  
+Cost: 8 credits
+
 Poll: `GET /api/audio/suno/add-instrumental/status?taskId=...`
 
 ---
@@ -218,7 +228,8 @@ Response:
 }
 ```
 
-Cost: 10 credits  
+Cost: 10 credits
+
 Poll: `GET /api/audio/suno/add-vocals/status?taskId=...`
 
 ---
@@ -245,7 +256,8 @@ Response:
 }
 ```
 
-Cost: 6 credits  
+Cost: 6 credits
+
 Poll: `GET /api/audio/suno/boost-style/status?taskId=...`
 
 ---
@@ -298,7 +310,8 @@ Response:
 }
 ```
 
-Cost: 10 credits  
+Cost: 10 credits
+
 Poll: `GET /api/audio/suno/upload-extend/status?taskId=...`
 
 ---
@@ -333,9 +346,9 @@ Cost: 0 credits (included in music generation)
 ## General Notes
 
 - **Async Tools:** Most tools return a `taskId` for polling (use `GET /api/audio/suno/{tool}/status?taskId=...`)
-- **Polling:** Check status every 5–10 seconds
+- **Polling:** Check status every 5-10 seconds
 - **Sync Tools:** Some (lyrics, stems, wav) return results immediately
-- **Cost:** Varies per tool (6–20 credits)
+- **Cost:** Varies per tool (6-20 credits)
 - **Authentication:** All require Bearer token
 
 ## Workflow Example
@@ -350,6 +363,6 @@ Cost: 0 credits (included in music generation)
 
 ## Error Handling
 
-All tools return standard error codes (400, 401, 402, 429, 500, 502). See [../errors.md](../errors.md).
+All tools return standard error codes (400, 401, 402, 429, 500, 502). See [Error Responses](/docs/errors).
 
 Async tools that fail will mark the task as `state: "fail"` with an error message.

@@ -1,3 +1,8 @@
+---
+title: Audio Tools
+description: Sound effects, voice cloning, transcription, and text-to-speech endpoints.
+---
+
 # Audio Tools
 
 Collection of synchronous and asynchronous audio processing endpoints.
@@ -10,14 +15,14 @@ Generate sound effects from text descriptions.
 
 ### Authentication
 
-Bearer token required (browser session only in current codebase).
+Bearer token required.
 
 ### Request Body
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | `text` | string | Yes | Description of the sound effect. Max 500 chars |
-| `duration_seconds` | number | No | Desired length in seconds. Range: 0.5–22. Default: auto-detect from description |
+| `duration_seconds` | number | No | Desired length in seconds. Range: 0.5-22. Default: auto-detect from description |
 
 ### Response
 
@@ -78,7 +83,7 @@ Bearer token required.
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `audioUrl` | string | Yes | URL of reference voice audio (MP3, WAV, M4A). Duration: 15–120 seconds |
+| `audioUrl` | string | Yes | URL of reference voice audio (MP3, WAV, M4A). Duration: 15-120 seconds |
 | `name` | string | No | Name for the cloned voice. Default: "Cloned Voice" |
 
 ### Response
@@ -136,7 +141,7 @@ Bearer token required.
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `audioUrl` | string | Yes | URL of audio file (MP3, WAV, M4A, OGG, FLAC). Duration: < 25 minutes |
+| `audioUrl` | string | Yes | URL of audio file (MP3, WAV, M4A, OGG, FLAC). Duration: less than 25 minutes |
 | `language` | string | No | Language code (e.g., `en`, `es`, `fr`). Default: auto-detect |
 
 ### Response
@@ -192,8 +197,8 @@ Bearer token required.
 | `text` | string | Yes | Text to convert to speech. Max 5000 chars |
 | `voiceId` | string | No | Voice ID (e.g., `Sarah`, `James`, or a cloned voice ID). Default: `Sarah` |
 | `model` | string | No | ElevenLabs model (usually `eleven_monolingual_v1`). Default: latest |
-| `stability` | number | No | Voice stability: 0–1. Default: 0.5 (balanced) |
-| `similarityBoost` | number | No | Voice similarity: 0–1. Default: 0.75 |
+| `stability` | number | No | Voice stability: 0-1. Default: 0.5 (balanced) |
+| `similarityBoost` | number | No | Voice similarity: 0-1. Default: 0.75 |
 
 ### Response
 
@@ -235,16 +240,16 @@ curl -X POST https://glowey.app/api/tts/elevenlabs \
 
 | Tool | Request | Credits | Async? |
 |------|---------|---------|--------|
-| SFX | `POST /api/audio/sfx` | 5 | No (30–60s timeout) |
+| SFX | `POST /api/audio/sfx` | 5 | No (30-60s timeout) |
 | Clone | `POST /api/audio/clone` | 30 | No (varies) |
 | Transcribe | `POST /api/audio/transcribe` | 3 | No (depends on length) |
-| TTS | `POST /api/tts/elevenlabs` | 10 | No (2–5s) |
+| TTS | `POST /api/tts/elevenlabs` | 10 | No (2-5s) |
 
 ---
 
 ## Tips
 
 - **SFX:** Keep descriptions under 100 chars for faster generation
-- **Clone:** Use 30–60s of clear, consistent voice for best results
+- **Clone:** Use 30-60s of clear, consistent voice for best results
 - **Transcribe:** Supports multiple languages; auto-detection is fast
 - **TTS:** Adjust stability/similarity for your use case (lower stability = more expressive)

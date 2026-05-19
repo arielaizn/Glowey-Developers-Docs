@@ -1,0 +1,38 @@
+---
+title: Introduction
+description: Get started with the Glowey Developer API — generate images, video, music, audio, and more.
+---
+
+# Glowey Developer API
+
+The Glowey API lets developers integrate AI-powered creative generation into their apps. Generate images, videos, audio, music, and more — each request deducts credits from the authenticated token owner's Glowey subscription.
+
+## Quick Start
+
+**1. Get a token:** Sign in at [glowey.app](https://glowey.app) → Settings → Developer API. Create a token and copy it immediately (never shown again).
+
+**2. Make a request:**
+
+```bash
+curl -X POST https://glowey.app/api/generate \
+  -H "Authorization: Bearer glow_sk_YOUR_TOKEN_HERE" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "modelId": "flux-pro",
+    "prompt": "a serene lake at sunset",
+    "resolution": "1K"
+  }'
+```
+
+**3. Poll for results:** Use the `taskId` returned above with the status endpoint (documented per feature).
+
+## Key Concepts
+
+- **Authentication:** Include `Authorization: Bearer glow_sk_YOUR_TOKEN_HERE` on every request.
+- **Credits:** Each call costs credits (see [Credits & Pricing](/docs/credits-and-pricing)). Insufficient credits returns a 402 response.
+- **Rate Limiting:** 60 requests per minute per token.
+- **Async Tasks:** Image, video, lipsync, and music use taskId polling. Chat and audio tools are sync or streaming.
+
+## API Base
+
+All endpoints are at `https://glowey.app/api/`

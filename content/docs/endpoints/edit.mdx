@@ -1,3 +1,8 @@
+---
+title: Image Editing
+description: Edit and enhance images with enhance, background removal, inpainting, and expand operations.
+---
+
 # Image Editing
 
 Edit and enhance images with various operations.
@@ -35,7 +40,7 @@ Bearer token required.
 
 ### Credit Cost
 
-Fixed per operation. See [../credits-and-pricing.md#image-editing](../credits-and-pricing.md#image-editing).
+Fixed per operation. See [Credits & Pricing](/docs/credits-and-pricing#image-editing).
 
 | Operation | Credits |
 |-----------|---------|
@@ -182,16 +187,16 @@ curl "https://glowey.app/api/edit/status?taskId=task_edit_xyz789" \
 ### Polling Strategy
 
 1. Submit edit request → get `taskId`
-2. Poll every 2–5 seconds
+2. Poll every 2-5 seconds
 3. When `state` is `success` or `fail`, stop
 4. Download edited image from `output.imageUrl`
 
 ### Typical Time to Completion
 
-- Enhance: 3–8 seconds
-- Remove Background: 2–5 seconds
-- Inpaint: 5–15 seconds
-- Expand: 10–20 seconds
+- Enhance: 3-8 seconds
+- Remove Background: 2-5 seconds
+- Inpaint: 5-15 seconds
+- Expand: 10-20 seconds
 
 ---
 
@@ -231,7 +236,7 @@ Extends the image canvas and fills new areas based on content and prompt.
 
 ## Tips
 
-- **Image Quality:** Input images should be < 10 MB and reasonably clear
+- **Image Quality:** Input images should be less than 10 MB and reasonably clear
 - **Mask Format:** Use PNG with pure white (255,255,255) for areas to edit and pure black (0,0,0) to preserve
 - **Prompts:** Be specific ("sunset sky" vs "sky") for better results
 - **Batch Edits:** Use different `taskId`s for each edit; don't reuse IDs

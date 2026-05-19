@@ -1,3 +1,8 @@
+---
+title: Lipsync
+description: Synchronize audio to avatar and video faces for lifelike character animations.
+---
+
 # Lipsync
 
 Synchronize audio to avatar/video faces for lifelike character animations.
@@ -35,7 +40,7 @@ Bearer token required.
 
 ### Credit Cost
 
-Fixed per model. See [../credits-and-pricing.md#lipsync](../credits-and-pricing.md#lipsync).
+Fixed per model. See [Credits & Pricing](/docs/credits-and-pricing#lipsync).
 
 - Sync Lipsync v2: 40 credits
 - Sync Lipsync v3: 80 credits
@@ -138,15 +143,15 @@ curl "https://glowey.app/api/lipsync/status?taskId=task_lip789def&modelId=sync-l
 ### Polling Strategy
 
 1. Submit lipsync request → get `taskId`
-2. Poll every 3–5 seconds
+2. Poll every 3-5 seconds
 3. When `state` is `success` or `fail`, stop
 4. Download result from `output.video_url`
 
 ### Typical Time to Completion
 
-- Sync Lipsync v2: 10–20 seconds
-- Sync Lipsync v3: 15–30 seconds
-- Veed Fabric: 5–15 seconds
+- Sync Lipsync v2: 10-20 seconds
+- Sync Lipsync v3: 15-30 seconds
+- Veed Fabric: 5-15 seconds
 
 ---
 
@@ -166,7 +171,7 @@ curl "https://glowey.app/api/lipsync/status?taskId=task_lip789def&modelId=sync-l
 
 ## Tips
 
-- **Audio Format:** MP3, WAV, or M4A. Duration: < 1 minute (most models)
-- **Video Format:** MP4, MOV, or GIF. Size: < 50 MB
+- **Audio Format:** MP3, WAV, or M4A. Duration: less than 1 minute (most models)
+- **Video Format:** MP4, MOV, or GIF. Size: less than 50 MB
 - **Face Quality:** Frontals work best. Side profiles or poor lighting may fail
 - **Multiple Faces:** Models sync the largest/most prominent face
