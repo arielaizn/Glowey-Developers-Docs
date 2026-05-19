@@ -1,0 +1,366 @@
+# cURL Examples
+
+Quick command-line examples using `curl`.
+
+## Setup
+
+```bash
+# Set your token for reuse
+TOKEN="glow_sk_YOUR_TOKEN_HERE"
+BASE_URL="https://glowey.app/api"
+```
+
+---
+
+## Image Generation
+
+### Submit
+
+```bash
+curl -X POST https://glowey.app/api/generate \
+  -H "Authorization: Bearer glow_sk_YOUR_TOKEN_HERE" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "modelId": "flux-pro",
+    "prompt": "a serene lake at sunset with mountains",
+    "resolution": "2K",
+    "aspectRatio": "16:9"
+  }'
+```
+
+Response:
+```json
+{
+  "taskId": "task_abc123xyz",
+  "strategy": "market"
+}
+```
+
+### Check Status
+
+```bash
+curl https://glowey.app/api/generate/status?taskId=task_abc123xyz \
+  -H "Authorization: Bearer glow_sk_YOUR_TOKEN_HERE"
+```
+
+Response (success):
+```json
+{
+  "state": "success",
+  "taskId": "task_abc123xyz",
+  "output": {
+    "images": [
+      {
+        "url": "https://storage.glowey.app/image_xyz789.jpg",
+        "seed": 12345
+      }
+    ]
+  }
+}
+```
+
+---
+
+## Video Generation
+
+### Submit
+
+```bash
+curl -X POST https://glowey.app/api/video/generate \
+  -H "Authorization: Bearer glow_sk_YOUR_TOKEN_HERE" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "modelId": "seedance-2-fast",
+    "prompt": "a robot dancing in a neon-lit city",
+    "duration": 5,
+    "resolution": "720p"
+  }'
+```
+
+Response:
+```json
+{
+  "taskId": "task_vid789",
+  "strategy": "market"
+}
+```
+
+### Check Status
+
+```bash
+curl https://glowey.app/api/video/status?taskId=task_vid789 \
+  -H "Authorization: Bearer glow_sk_YOUR_TOKEN_HERE"
+```
+
+---
+
+## Chat (Streaming SSE)
+
+```bash
+curl -X POST https://glowey.app/api/chat \
+  -H "Authorization: Bearer glow_sk_YOUR_TOKEN_HERE" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "claude-opus-4-7",
+    "messages": [
+      {"role": "user", "content": "Explain quantum computing in simple terms"}
+    ],
+    "webSearch": false
+  }'
+```
+
+Output (streaming):
+```
+data: {"choices":[{"delta":{"content":"Quantum"},"index":0,"finish_reason":null}]}
+
+data: {"choices":[{"delta":{"content":" computing"},"index":0,"finish_reason":null}]}
+
+data: [DONE]
+```
+
+To parse and print nicely:
+
+```bash
+curl -s -X POST https://glowey.app/api/chat \
+  -H "Authorization: Bearer glow_sk_YOUR_TOKEN_HERE" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "claude-opus-4-7",
+    "messages": [{"role": "user", "content": "Hello!"}]
+  }' | grep -oP '(?<="content":")[^"]*' | tr -d '\n' && echo
+```
+
+---
+
+## Music Generation
+
+### Submit
+
+```bash
+curl -X POST https://glowey.app/api/audio/music \
+  -H "Authorization: Bearer glow_sk_YOUR_TOKEN_HERE" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "prompt": "upbeat electronic dance track with synthesizers",
+    "model": "V5",
+    "customMode": false
+  }'
+```
+
+Response:
+```json
+{
+  "taskId": "task_mus890"
+}
+```
+
+### Check Status
+
+```bash
+curl https://glowey.app/api/audio/music/status?taskId=task_mus890 \
+  -H "Authorization: Bearer glow_sk_YOUR_TOKEN_HERE"
+```
+
+---
+
+## Sound Effects
+
+```bash
+curl -X POST https://glowey.app/api/audio/sfx \
+  -H "Authorization: Bearer glow_sk_YOUR_TOKEN_HERE" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "text": "heavy door slamming followed by three gunshots",
+    "duration_seconds": 3
+  }'
+```
+
+Response:
+```json
+{
+  "success": true,
+  "audioUrls": ["https://storage.glowey.app/sfx_xyz789.mp3"]
+}
+```
+
+---
+
+## Lipsync
+
+### Submit
+
+```bash
+curl -X POST https://glowey.app/api/lipsync/generate \
+  -H "Authorization: Bearer glow_sk_YOUR_TOKEN_HERE" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "modelId": "sync-lipsync-v2",
+    "audioUrl": "https://example.com/audio.mp3",
+    "videoUrl": "https://example.com/avatar.mp4"
+  }'
+```
+
+### Check Status
+
+```bash
+curl "https://glowey.app/api/lipsync/status?taskId=task_lip789&modelId=sync-lipsync-v2" \
+  -H "Authorization: Bearer glow_sk_YOUR_TOKEN_HERE"
+```
+
+---
+
+## Image Edit
+
+### Enhance
+
+```bash
+curl -X POST https://glowey.app/api/edit \
+  -H "Authorization: Bearer glow_sk_YOUR_TOKEN_HERE" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "operation": "enhance",
+    "imageUrl": "https://example.com/photo.jpg"
+  }'
+```
+
+### Remove Background
+
+```bash
+curl -X POST https://glowey.app/api/edit \
+  -H "Authorization: Bearer glow_sk_YOUR_TOKEN_HERE" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "operation": "remove-bg",
+    "imageUrl": "https://example.com/product.jpg"
+  }'
+```
+
+### Inpaint
+
+```bash
+curl -X POST https://glowey.app/api/edit \
+  -H "Authorization: Bearer glow_sk_YOUR_TOKEN_HERE" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "operation": "inpaint",
+    "imageUrl": "https://example.com/photo.jpg",
+    "maskUrl": "https://example.com/mask.png",
+    "prompt": "replace the sky with a sunset"
+  }'
+```
+
+### Check Edit Status
+
+```bash
+curl https://glowey.app/api/edit/status?taskId=task_edit_xyz789 \
+  -H "Authorization: Bearer glow_sk_YOUR_TOKEN_HERE"
+```
+
+---
+
+## Token Management
+
+### Create Token
+
+```bash
+curl -X POST https://glowey.app/api/user/tokens \
+  -H "Cookie: auth_token=YOUR_SESSION_COOKIE" \
+  -H "Content-Type: application/json" \
+  -d '{"name": "My CLI Token"}'
+```
+
+Note: Must use browser session cookie, not a dev token.
+
+### List Tokens
+
+```bash
+curl https://glowey.app/api/user/tokens \
+  -H "Cookie: auth_token=YOUR_SESSION_COOKIE"
+```
+
+### Revoke Token
+
+```bash
+curl -X DELETE https://glowey.app/api/user/tokens/token_id_here \
+  -H "Cookie: auth_token=YOUR_SESSION_COOKIE"
+```
+
+---
+
+## Polling Loop (Bash)
+
+```bash
+#!/bin/bash
+
+TOKEN="glow_sk_YOUR_TOKEN_HERE"
+TASK_ID="task_abc123xyz"
+
+echo "Polling for completion..."
+while true; do
+  STATUS=$(curl -s https://glowey.app/api/generate/status?taskId=$TASK_ID \
+    -H "Authorization: Bearer $TOKEN" | jq -r '.state')
+  
+  echo "Status: $STATUS"
+  
+  if [ "$STATUS" != "pending" ]; then
+    break
+  fi
+  
+  sleep 2
+done
+
+# Get the final result
+curl -s https://glowey.app/api/generate/status?taskId=$TASK_ID \
+  -H "Authorization: Bearer $TOKEN" | jq '.output.images[0].url'
+```
+
+---
+
+## Error Handling
+
+### Check Status Code
+
+```bash
+curl -w "\nHTTP Status: %{http_code}\n" \
+  https://glowey.app/api/generate \
+  -H "Authorization: Bearer glow_sk_YOUR_TOKEN_HERE" \
+  ...
+```
+
+### Insufficient Credits (402)
+
+```bash
+curl -X POST https://glowey.app/api/generate \
+  -H "Authorization: Bearer glow_sk_YOUR_TOKEN_HERE" \
+  -H "Content-Type: application/json" \
+  -d '{"modelId":"flux-pro","prompt":"a cat"}' 2>/dev/null | jq '.'
+
+# Output:
+# {
+#   "error": "insufficient_credits",
+#   "required": 15,
+#   "current": 8
+# }
+```
+
+### Rate Limit (429)
+
+```bash
+# Get Retry-After header
+curl -i -X POST https://glowey.app/api/generate \
+  -H "Authorization: Bearer glow_sk_YOUR_TOKEN_HERE" \
+  -d '{"modelId":"flux-pro","prompt":"a cat"}' 2>/dev/null | grep Retry-After
+
+# Output:
+# Retry-After: 35
+```
+
+---
+
+## Tips
+
+- **Pretty JSON:** Pipe to `jq` for formatted output: `curl ... | jq '.'`
+- **Extract Fields:** Use `jq` selectors: `curl ... | jq '.output.images[0].url'`
+- **Verbose:** Add `-v` flag to see request/response headers
+- **Save Output:** Redirect to file: `curl ... > response.json`
+- **Variables:** Use `$TOKEN` and `$TASK_ID` for reusable scripts

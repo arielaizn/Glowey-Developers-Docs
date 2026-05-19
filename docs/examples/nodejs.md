@@ -1,0 +1,521 @@
+# JavaScript / Node.js Examples
+
+Complete examples using `fetch` (Node 18+) and `axios`.
+
+## Setup
+
+### Using Fetch (Built-in, Node 18+)
+
+```javascript
+const token = 'glow_sk_YOUR_TOKEN_HERE';
+
+const headers = {
+  'Authorization': `Bearer ${token}`,
+  'Content-Type': 'application/json',
+};
+
+const baseURL = 'https://glowey.app/api';
+```
+
+### Using Axios
+
+```bash
+npm install axios
+```
+
+```javascript
+const axios = require('axios');
+
+const client = axios.create({
+  baseURL: 'https://glowey.app/api',
+  headers: {
+    'Authorization': `Bearer glow_sk_YOUR_TOKEN_HERE`,
+    'Content-Type': 'application/json',
+  },
+});
+```
+
+---
+
+## Image Generation
+
+### Fetch
+
+```javascript
+const token = 'glow_sk_YOUR_TOKEN_HERE';
+
+async function generateImage() {
+  // 1. Submit request
+  const submitRes = await fetch('https://glowey.app/api/generate', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      modelId: 'flux-pro',
+      prompt: 'a serene lake at sunset, mountains in background',
+      resolution: '2K',
+      aspectRatio: '16:9',
+    }),
+  });
+
+  if (!submitRes.ok) {
+    const error = await submitRes.json();
+    throw new Error(`Submit failed: ${error.error}`);
+  }
+
+  const { taskId } = await submitRes.json();
+  console.log('Generation submitted, taskId:', taskId);
+
+  // 2. Poll for completion
+  let state = 'pending';
+  let result;
+  while (state === 'pending') {
+    await new Promise(r => setTimeout(r, 2000)); // Wait 2s
+
+    const statusRes = await fetch(
+      `https://glowey.app/api/generate/status?taskId=${taskId}`,
+      {
+        headers: { 'Authorization': `Bearer ${token}` },
+      }
+    );
+
+    if (!statusRes.ok) {
+      throw new Error('Status check failed');
+    }
+
+    result = await statusRes.json();
+    state = result.state;
+    console.log(`Status: ${state}`);
+  }
+
+  if (state === 'fail') {
+    throw new Error(`Generation failed: ${result.error}`);
+  }
+
+  console.log('Image URL:', result.output.images[0].url);
+  return result.output.images[0].url;
+}
+
+generateImage().catch(err => console.error(err));
+```
+
+### Axios
+
+```javascript
+const axios = require('axios');
+
+const client = axios.create({
+  baseURL: 'https://glowey.app/api',
+  headers: {
+    'Authorization': 'Bearer glow_sk_YOUR_TOKEN_HERE',
+  },
+});
+
+async function generateImage() {
+  // Submit
+  const { data: submitData } = await client.post('/generate', {
+    modelId: 'flux-pro',
+    prompt: 'a serene lake at sunset, mountains in background',
+    resolution: '2K',
+  });
+
+  const { taskId } = submitData;
+  console.log('Task ID:', taskId);
+
+  // Poll
+  let state = 'pending';
+  while (state === 'pending') {
+    await new Promise(r => setTimeout(r, 2000));
+    const { data: status } = await client.get(`/generate/status?taskId=${taskId}`);
+    state = status.state;
+    console.log(`Status: ${state}`);
+  }
+
+  if (state === 'fail') throw new Error(status.error);
+  console.log('Image:', status.output.images[0].url);
+}
+
+generateImage().catch(err => console.error(err));
+```
+
+---
+
+## Video Generation
+
+### Fetch
+
+```javascript
+async function generateVideo() {
+  const token = 'glow_sk_YOUR_TOKEN_HERE';
+
+  // Submit
+  const res = await fetch('https://glowey.app/api/video/generate', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      modelId: 'seedance-2-fast',
+      prompt: 'a robot dancing in a neon-lit city',
+      duration: 5,
+      resolution: '720p',
+    }),
+  });
+
+  const { taskId } = await res.json();
+  console.log('Video task:', taskId);
+
+  // Poll (every 5 seconds)
+  let done = false;
+  while (!done) {
+    await new Promise(r => setTimeout(r, 5000));
+    const statusRes = await fetch(
+      `https://glowey.app/api/video/status?taskId=${taskId}`,
+      { headers: { 'Authorization': `Bearer ${token}` } }
+    );
+    const status = await statusRes.json();
+    done = status.state !== 'pending';
+    console.log('Status:', status.state);
+  }
+
+  console.log('Video URL:', status.output.video_url);
+}
+
+generateVideo().catch(console.error);
+```
+
+---
+
+## Chat with Streaming
+
+### Fetch + ReadableStream
+
+```javascript
+async function chatStream() {
+  const token = 'glow_sk_YOUR_TOKEN_HERE';
+
+  const res = await fetch('https://glowey.app/api/chat', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: 'claude-opus-4-7',
+      messages: [
+        { role: 'user', content: 'Explain quantum computing in simple terms' },
+      ],
+      webSearch: false,
+    }),
+  });
+
+  if (!res.ok) {
+    const error = await res.json();
+    throw new Error(`Chat failed: ${error.error}`);
+  }
+
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = '';
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+
+    buffer += decoder.decode(value, { stream: true });
+    const lines = buffer.split('\n');
+    buffer = lines.pop() || '';
+
+    for (const line of lines) {
+      if (line.startsWith('data: ') && line !== 'data: [DONE]') {
+        try {
+          const json = JSON.parse(line.slice(6));
+          const chunk = json.choices?.[0]?.delta?.content || '';
+          if (chunk) process.stdout.write(chunk);
+        } catch { /* skip */ }
+      }
+    }
+  }
+
+  console.log('\n');
+}
+
+chatStream().catch(console.error);
+```
+
+### Axios + Streaming
+
+```javascript
+const axios = require('axios');
+
+async function chatStream() {
+  const client = axios.create({
+    baseURL: 'https://glowey.app/api',
+    headers: {
+      'Authorization': 'Bearer glow_sk_YOUR_TOKEN_HERE',
+    },
+  });
+
+  const res = await client.post('/chat', {
+    model: 'claude-opus-4-7',
+    messages: [
+      { role: 'user', content: 'Tell me a joke' },
+    ],
+  }, {
+    responseType: 'stream',
+  });
+
+  res.data.on('data', chunk => {
+    const lines = chunk.toString().split('\n');
+    for (const line of lines) {
+      if (line.startsWith('data: ') && line !== 'data: [DONE]') {
+        try {
+          const json = JSON.parse(line.slice(6));
+          const text = json.choices?.[0]?.delta?.content || '';
+          if (text) process.stdout.write(text);
+        } catch { /* skip */ }
+      }
+    }
+  });
+
+  return new Promise((resolve, reject) => {
+    res.data.on('end', resolve);
+    res.data.on('error', reject);
+  });
+}
+
+chatStream().catch(console.error);
+```
+
+---
+
+## Music Generation
+
+### Fetch
+
+```javascript
+async function generateMusic() {
+  const token = 'glow_sk_YOUR_TOKEN_HERE';
+
+  // Submit
+  const res = await fetch('https://glowey.app/api/audio/music', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      prompt: 'upbeat electronic dance track with synthesizers',
+      model: 'V5',
+      customMode: false,
+    }),
+  });
+
+  const { taskId } = await res.json();
+  console.log('Music task:', taskId);
+
+  // Poll (every 10 seconds)
+  let done = false;
+  while (!done) {
+    await new Promise(r => setTimeout(r, 10000));
+    const statusRes = await fetch(
+      `https://glowey.app/api/audio/music/status?taskId=${taskId}`,
+      { headers: { 'Authorization': `Bearer ${token}` } }
+    );
+    const status = await statusRes.json();
+    done = status.state !== 'pending';
+    console.log('Status:', status.state);
+  }
+
+  console.log('Audio URL:', status.output.audio_url);
+}
+
+generateMusic().catch(console.error);
+```
+
+---
+
+## Error Handling
+
+### Retry with Exponential Backoff
+
+```javascript
+async function fetchWithRetry(url, options, maxRetries = 3) {
+  let lastError;
+
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    try {
+      const res = await fetch(url, options);
+
+      if (res.status === 429) {
+        const error = await res.json();
+        const waitSeconds = error.retryAfter || (2 ** attempt);
+        console.log(`Rate limited. Waiting ${waitSeconds}s...`);
+        await new Promise(r => setTimeout(r, waitSeconds * 1000));
+        continue;
+      }
+
+      if (res.status === 402) {
+        const error = await res.json();
+        throw new Error(
+          `Insufficient credits. Need ${error.required}, have ${error.current}`
+        );
+      }
+
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status}`);
+      }
+
+      return res;
+    } catch (err) {
+      lastError = err;
+      if (attempt < maxRetries - 1) {
+        const wait = 2 ** attempt; // exponential backoff
+        console.log(`Attempt ${attempt + 1} failed. Waiting ${wait}s...`);
+        await new Promise(r => setTimeout(r, wait * 1000));
+      }
+    }
+  }
+
+  throw lastError;
+}
+
+// Usage
+const res = await fetchWithRetry(
+  'https://glowey.app/api/generate',
+  {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer glow_sk_YOUR_TOKEN_HERE`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      modelId: 'flux-pro',
+      prompt: 'a cat',
+    }),
+  }
+);
+
+const data = await res.json();
+```
+
+---
+
+## Helper Class
+
+```javascript
+class GloweyClient {
+  constructor(token) {
+    this.token = token;
+    this.baseURL = 'https://glowey.app/api';
+  }
+
+  async request(method, path, body = null) {
+    const opts = {
+      method,
+      headers: {
+        'Authorization': `Bearer ${this.token}`,
+        'Content-Type': 'application/json',
+      },
+    };
+
+    if (body) opts.body = JSON.stringify(body);
+
+    const res = await fetch(`${this.baseURL}${path}`, opts);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return res.json();
+  }
+
+  async generateImage(modelId, prompt, resolution = '1K') {
+    return this.request('POST', '/generate', {
+      modelId,
+      prompt,
+      resolution,
+    });
+  }
+
+  async checkImageStatus(taskId) {
+    return this.request('GET', `/generate/status?taskId=${taskId}`);
+  }
+
+  async generateVideo(modelId, prompt, duration = 5, resolution = '720p') {
+    return this.request('POST', '/video/generate', {
+      modelId,
+      prompt,
+      duration,
+      resolution,
+    });
+  }
+
+  async *pollUntilDone(path, intervalMs = 2000) {
+    let state = 'pending';
+    while (state === 'pending') {
+      await new Promise(r => setTimeout(r, intervalMs));
+      const result = await this.request('GET', path);
+      state = result.state;
+      yield result;
+    }
+  }
+}
+
+// Usage
+const glowey = new GloweyClient('glow_sk_YOUR_TOKEN_HERE');
+
+const img = await glowey.generateImage('flux-pro', 'a cat');
+for await (const status of glowey.pollUntilDone(`/generate/status?taskId=${img.taskId}`)) {
+  console.log('Status:', status.state);
+}
+```
+
+---
+
+## TypeScript
+
+```typescript
+interface GenerateRequest {
+  modelId: string;
+  prompt: string;
+  resolution?: string;
+}
+
+interface GenerateResponse {
+  taskId: string;
+  strategy: string;
+}
+
+interface StatusResponse {
+  state: 'pending' | 'success' | 'fail';
+  taskId: string;
+  output?: { images: Array<{ url: string }> };
+  error?: string;
+}
+
+async function generateImage(req: GenerateRequest): Promise<string> {
+  const res = await fetch('https://glowey.app/api/generate', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer glow_sk_YOUR_TOKEN_HERE`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(req),
+  });
+
+  const { taskId }: GenerateResponse = await res.json();
+
+  let status: StatusResponse;
+  do {
+    await new Promise(r => setTimeout(r, 2000));
+    const res = await fetch(
+      `https://glowey.app/api/generate/status?taskId=${taskId}`,
+      { headers: { 'Authorization': `Bearer glow_sk_YOUR_TOKEN_HERE` } }
+    );
+    status = await res.json();
+  } while (status.state === 'pending');
+
+  if (status.state === 'fail') throw new Error(status.error);
+  return status.output!.images[0].url;
+}
+```

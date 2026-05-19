@@ -1,0 +1,250 @@
+# Audio Tools
+
+Collection of synchronous and asynchronous audio processing endpoints.
+
+## Sound Effects (SFX)
+
+**POST** `/api/audio/sfx`
+
+Generate sound effects from text descriptions.
+
+### Authentication
+
+Bearer token required (browser session only in current codebase).
+
+### Request Body
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `text` | string | Yes | Description of the sound effect. Max 500 chars |
+| `duration_seconds` | number | No | Desired length in seconds. Range: 0.5–22. Default: auto-detect from description |
+
+### Response
+
+```json
+{
+  "success": true,
+  "audioUrls": ["https://storage.glowey.app/sfx_xyz789.mp3"]
+}
+```
+
+### Credit Cost
+
+5 credits per request.
+
+### Errors
+
+- `400` – Missing `text`
+- `401` – Unauthorized
+- `402` – Insufficient credits
+- `500` – Server error (credits refunded)
+- `502` – Provider error (credits refunded)
+- `504` – Generation timed out (credits refunded)
+
+### Example Request
+
+```bash
+curl -X POST https://glowey.app/api/audio/sfx \
+  -H "Authorization: Bearer glow_sk_YOUR_TOKEN_HERE" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "text": "heavy door slamming followed by three gunshots",
+    "duration_seconds": 3
+  }'
+```
+
+### Example Response
+
+```json
+{
+  "success": true,
+  "audioUrls": ["https://storage.glowey.app/sfx_xyz789.mp3"]
+}
+```
+
+---
+
+## Voice Cloning
+
+**POST** `/api/audio/clone`
+
+Clone a voice from an audio sample. Returns a voice ID for TTS.
+
+### Authentication
+
+Bearer token required.
+
+### Request Body
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `audioUrl` | string | Yes | URL of reference voice audio (MP3, WAV, M4A). Duration: 15–120 seconds |
+| `name` | string | No | Name for the cloned voice. Default: "Cloned Voice" |
+
+### Response
+
+```json
+{
+  "success": true,
+  "voiceId": "voice_clone_abc123xyz",
+  "name": "Cloned Voice"
+}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `voiceId` | string | ID to use with TTS endpoints |
+| `name` | string | Display name for the voice |
+
+### Credit Cost
+
+30 credits per clone.
+
+### Errors
+
+- `400` – Missing or invalid parameters
+- `401` – Unauthorized
+- `402` – Insufficient credits
+- `500` – Server error (credits refunded)
+- `502` – Provider error (credits refunded)
+
+### Example Request
+
+```bash
+curl -X POST https://glowey.app/api/audio/clone \
+  -H "Authorization: Bearer glow_sk_YOUR_TOKEN_HERE" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "audioUrl": "https://example.com/reference_voice.mp3",
+    "name": "My Custom Voice"
+  }'
+```
+
+---
+
+## Transcription
+
+**POST** `/api/audio/transcribe`
+
+Convert audio to text using Gemini transcription.
+
+### Authentication
+
+Bearer token required.
+
+### Request Body
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `audioUrl` | string | Yes | URL of audio file (MP3, WAV, M4A, OGG, FLAC). Duration: < 25 minutes |
+| `language` | string | No | Language code (e.g., `en`, `es`, `fr`). Default: auto-detect |
+
+### Response
+
+```json
+{
+  "success": true,
+  "text": "Hello, this is the transcribed text from the audio file.",
+  "language": "en"
+}
+```
+
+### Credit Cost
+
+3 credits per request.
+
+### Errors
+
+- `400` – Missing `audioUrl`
+- `401` – Unauthorized
+- `402` – Insufficient credits
+- `500` – Server error (credits refunded)
+- `502` – Provider error (credits refunded)
+
+### Example Request
+
+```bash
+curl -X POST https://glowey.app/api/audio/transcribe \
+  -H "Authorization: Bearer glow_sk_YOUR_TOKEN_HERE" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "audioUrl": "https://example.com/podcast.mp3",
+    "language": "en"
+  }'
+```
+
+---
+
+## Text-to-Speech (TTS)
+
+**POST** `/api/tts/elevenlabs`
+
+Generate speech from text using ElevenLabs voices.
+
+### Authentication
+
+Bearer token required.
+
+### Request Body
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `text` | string | Yes | Text to convert to speech. Max 5000 chars |
+| `voiceId` | string | No | Voice ID (e.g., `Sarah`, `James`, or a cloned voice ID). Default: `Sarah` |
+| `model` | string | No | ElevenLabs model (usually `eleven_monolingual_v1`). Default: latest |
+| `stability` | number | No | Voice stability: 0–1. Default: 0.5 (balanced) |
+| `similarityBoost` | number | No | Voice similarity: 0–1. Default: 0.75 |
+
+### Response
+
+```json
+{
+  "success": true,
+  "audioUrl": "https://storage.glowey.app/tts_xyz789.mp3"
+}
+```
+
+### Credit Cost
+
+10 credits per request (ElevenLabs).
+
+### Errors
+
+- `400` – Missing `text`
+- `401` – Unauthorized
+- `402` – Insufficient credits
+- `500` – Server error (credits refunded)
+- `502` – Provider error (credits refunded)
+
+### Example Request
+
+```bash
+curl -X POST https://glowey.app/api/tts/elevenlabs \
+  -H "Authorization: Bearer glow_sk_YOUR_TOKEN_HERE" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "text": "Welcome to Glowey. This is a text-to-speech demonstration.",
+    "voiceId": "Sarah",
+    "stability": 0.5
+  }'
+```
+
+---
+
+## Summary
+
+| Tool | Request | Credits | Async? |
+|------|---------|---------|--------|
+| SFX | `POST /api/audio/sfx` | 5 | No (30–60s timeout) |
+| Clone | `POST /api/audio/clone` | 30 | No (varies) |
+| Transcribe | `POST /api/audio/transcribe` | 3 | No (depends on length) |
+| TTS | `POST /api/tts/elevenlabs` | 10 | No (2–5s) |
+
+---
+
+## Tips
+
+- **SFX:** Keep descriptions under 100 chars for faster generation
+- **Clone:** Use 30–60s of clear, consistent voice for best results
+- **Transcribe:** Supports multiple languages; auto-detection is fast
+- **TTS:** Adjust stability/similarity for your use case (lower stability = more expressive)

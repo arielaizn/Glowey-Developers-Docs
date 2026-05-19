@@ -1,0 +1,237 @@
+# Image Editing
+
+Edit and enhance images with various operations.
+
+## Edit Image
+
+**POST** `/api/edit`
+
+Apply edits to images: enhance, remove background, inpaint, or expand.
+
+### Authentication
+
+Bearer token required.
+
+### Request Body
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `operation` | string | Yes | Edit type: `enhance`, `remove-bg`, `inpaint`, `expand` |
+| `imageUrl` | string | Yes | URL of the image to edit |
+| `prompt` | string | Conditional | Required for `inpaint`, `expand`. Description of desired result |
+| `maskUrl` | string | Conditional | Required for `inpaint`. Mask image (white = areas to edit, black = keep) |
+
+### Response
+
+```json
+{
+  "taskId": "task_edit_xyz789"
+}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `taskId` | string | Unique task ID for polling |
+
+### Credit Cost
+
+Fixed per operation. See [../credits-and-pricing.md#image-editing](../credits-and-pricing.md#image-editing).
+
+| Operation | Credits |
+|-----------|---------|
+| Enhance | 5 |
+| Remove Background | 5 |
+| Inpaint | 10 |
+| Expand | 8 |
+
+### Errors
+
+- `400` – Missing or invalid parameters
+- `401` – Unauthorized
+- `402` – Insufficient credits
+- `429` – Rate limited
+- `500` – Server error (credits refunded)
+- `502` – AI provider error (credits refunded)
+
+### Example Requests
+
+#### Enhance
+
+```bash
+curl -X POST https://glowey.app/api/edit \
+  -H "Authorization: Bearer glow_sk_YOUR_TOKEN_HERE" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "operation": "enhance",
+    "imageUrl": "https://example.com/photo.jpg"
+  }'
+```
+
+#### Remove Background
+
+```bash
+curl -X POST https://glowey.app/api/edit \
+  -H "Authorization: Bearer glow_sk_YOUR_TOKEN_HERE" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "operation": "remove-bg",
+    "imageUrl": "https://example.com/product.jpg"
+  }'
+```
+
+#### Inpaint (Edit with Mask)
+
+```bash
+curl -X POST https://glowey.app/api/edit \
+  -H "Authorization: Bearer glow_sk_YOUR_TOKEN_HERE" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "operation": "inpaint",
+    "imageUrl": "https://example.com/photo.jpg",
+    "maskUrl": "https://example.com/mask.png",
+    "prompt": "replace the sky with a sunset"
+  }'
+```
+
+#### Expand
+
+```bash
+curl -X POST https://glowey.app/api/edit \
+  -H "Authorization: Bearer glow_sk_YOUR_TOKEN_HERE" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "operation": "expand",
+    "imageUrl": "https://example.com/photo.jpg",
+    "prompt": "extend the background to include mountains"
+  }'
+```
+
+### Example Response
+
+```json
+{
+  "taskId": "task_edit_xyz789"
+}
+```
+
+---
+
+## Check Edit Status
+
+**GET** `/api/edit/status`
+
+Poll for the result of an image edit task.
+
+### Authentication
+
+Bearer token required.
+
+### Query Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `taskId` | string | Yes | Task ID from the edit response |
+
+### Response (Pending)
+
+```json
+{
+  "state": "pending",
+  "taskId": "task_edit_xyz789"
+}
+```
+
+### Response (Success)
+
+```json
+{
+  "state": "success",
+  "taskId": "task_edit_xyz789",
+  "output": {
+    "imageUrl": "https://storage.glowey.app/edited_xyz789.jpg"
+  }
+}
+```
+
+### Response (Failed)
+
+```json
+{
+  "state": "fail",
+  "taskId": "task_edit_xyz789",
+  "error": "Image processing failed"
+}
+```
+
+If failed, any remaining credits are refunded.
+
+### Errors
+
+- `400` – Missing `taskId`
+- `401` – Unauthorized
+- `429` – Rate limited
+- `500` – Server error
+
+### Example Request
+
+```bash
+curl "https://glowey.app/api/edit/status?taskId=task_edit_xyz789" \
+  -H "Authorization: Bearer glow_sk_YOUR_TOKEN_HERE"
+```
+
+### Polling Strategy
+
+1. Submit edit request → get `taskId`
+2. Poll every 2–5 seconds
+3. When `state` is `success` or `fail`, stop
+4. Download edited image from `output.imageUrl`
+
+### Typical Time to Completion
+
+- Enhance: 3–8 seconds
+- Remove Background: 2–5 seconds
+- Inpaint: 5–15 seconds
+- Expand: 10–20 seconds
+
+---
+
+## Operation Details
+
+### Enhance
+
+Improves image quality: sharpen, upscale, denoise, color correction.
+
+- No additional parameters needed
+- Best for: low-res photos, blurry images, old photos
+
+### Remove Background
+
+Automatically detects and removes background, leaving the subject.
+
+- No additional parameters needed
+- Best for: product photos, portraits, graphics on solid backgrounds
+- Note: Returns image with transparent background (PNG)
+
+### Inpaint
+
+Edits specific regions using a mask. White areas in the mask are edited; black areas are preserved.
+
+- **Required:** `maskUrl` (PNG or JPG with white/black regions)
+- **Required:** `prompt` describing the edit
+- Best for: fixing unwanted objects, changing specific areas, fine-tuning
+
+### Expand
+
+Extends the image canvas and fills new areas based on content and prompt.
+
+- **Required:** `prompt` describing what to add
+- Best for: creating wider compositions, extending landscapes, adding context
+
+---
+
+## Tips
+
+- **Image Quality:** Input images should be < 10 MB and reasonably clear
+- **Mask Format:** Use PNG with pure white (255,255,255) for areas to edit and pure black (0,0,0) to preserve
+- **Prompts:** Be specific ("sunset sky" vs "sky") for better results
+- **Batch Edits:** Use different `taskId`s for each edit; don't reuse IDs

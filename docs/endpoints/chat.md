@@ -1,0 +1,220 @@
+# Chat (LLM)
+
+Stream multi-turn conversations with various LLM models. Supports tool use, web search, and memory.
+
+## Send Message
+
+**POST** `/api/chat`
+
+Submit a message to the LLM and receive a streamed response.
+
+### Authentication
+
+Bearer token required.
+
+### Request Body
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `model` | string | Yes | Model ID: `claude-opus-4-7`, `claude-sonnet-4-6`, `claude-haiku-4-5`, `gemini-3.1-pro`, `gemini-3-pro`, `gemini-3-flash`, `gemini-2.5-pro`, `gemini-2.5-flash`, `gpt-5-5`, `gpt-5-4`, `gpt-5-2` |
+| `messages` | object[] | Yes | Message history. Array of `{ role: "user" \| "assistant", content: string \| ContentPart[] }` |
+| `max_tokens` | number | No | Max output tokens. Default: 4096. Max: 16384 |
+| `systemPrompt` | string | No | Custom system message (prepended to model's defaults) |
+| `webSearch` | boolean | No | Enable web search (costs +2 credits). Default: false |
+| `deepResearch` | boolean | No | Enable deep research (+4 credits). Default: false |
+| `skills` | string[] | No | Enable tools: `web_search`, `recall_memory`, `save_memory`, `generate_image`, `mcp_fetch`, `mcp_get_current_time`, etc. |
+| `pipeline` | boolean | No | Internal use only (JSON-only mode for multi-agent). Default: false |
+
+### Message Content
+
+**Text-only:**
+
+```json
+{
+  "role": "user",
+  "content": "What is the capital of France?"
+}
+```
+
+**With images (base64):**
+
+```json
+{
+  "role": "user",
+  "content": [
+    { "type": "text", "text": "What's in this image?" },
+    { "type": "image_base64", "mimeType": "image/jpeg", "data": "base64encodedimage..." }
+  ]
+}
+```
+
+**With files:**
+
+```json
+{
+  "role": "user",
+  "content": [
+    { "type": "text", "text": "Analyze this document" },
+    { "type": "file", "name": "report.txt", "mimeType": "text/plain", "data": "base64encodedfile..." }
+  ]
+}
+```
+
+### Response
+
+Returns **Server-Sent Events (SSE)** stream:
+
+```
+data: {"choices":[{"delta":{"content":"The"},"index":0,"finish_reason":null}]}
+
+data: {"choices":[{"delta":{"content":" capital"},"index":0,"finish_reason":null}]}
+
+data: [DONE]
+```
+
+Each event is a chunk of the response text. Parse as JSON and accumulate `choices[0].delta.content`.
+
+### Credit Cost
+
+Base: 2 credits
+
+Modifiers:
+- Web search: +2 credits
+- Deep research: +4 credits
+- Image attachments: +1 credit
+
+Example: `webSearch=true` + 1 image = 2 + 2 + 1 = 5 credits.
+
+### Errors
+
+- `400` – Missing `model` or `messages`
+- `401` – Unauthorized
+- `402` – Insufficient credits
+- `429` – Rate limited
+- `500` – Server error
+- `502` – Model provider error
+
+### Example Request
+
+```bash
+curl -X POST https://glowey.app/api/chat \
+  -H "Authorization: Bearer glow_sk_YOUR_TOKEN_HERE" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "claude-opus-4-7",
+    "messages": [
+      { "role": "user", "content": "Explain quantum computing in simple terms" }
+    ],
+    "webSearch": false
+  }'
+```
+
+### Example Response (SSE Stream)
+
+```
+data: {"choices":[{"delta":{"content":"Quantum"},"index":0,"finish_reason":null}]}
+
+data: {"choices":[{"delta":{"content":" computing"},"index":0,"finish_reason":null}]}
+
+data: {"choices":[{"delta":{"content":" is..."},"index":0,"finish_reason":null}]}
+
+data: [DONE]
+```
+
+### Parsing SSE in Code
+
+**JavaScript:**
+
+```javascript
+const response = await fetch('https://glowey.app/api/chat', {
+  method: 'POST',
+  headers: {
+    'Authorization': 'Bearer glow_sk_YOUR_TOKEN_HERE',
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({
+    model: 'claude-opus-4-7',
+    messages: [{ role: 'user', content: 'Hello!' }],
+  }),
+});
+
+const reader = response.body.getReader();
+const decoder = new TextDecoder();
+let fullText = '';
+
+while (true) {
+  const { done, value } = await reader.read();
+  if (done) break;
+  
+  const chunk = decoder.decode(value);
+  const lines = chunk.split('\n');
+  
+  for (const line of lines) {
+    if (line.startsWith('data: ') && line !== 'data: [DONE]') {
+      try {
+        const json = JSON.parse(line.slice(6));
+        const text = json.choices?.[0]?.delta?.content || '';
+        fullText += text;
+        console.log(text); // Print chunk live
+      } catch { /* skip */ }
+    }
+  }
+}
+
+console.log('Final response:', fullText);
+```
+
+**Python:**
+
+```python
+import requests
+import json
+
+response = requests.post(
+  'https://glowey.app/api/chat',
+  headers={'Authorization': 'Bearer glow_sk_YOUR_TOKEN_HERE'},
+  json={
+    'model': 'claude-opus-4-7',
+    'messages': [{'role': 'user', 'content': 'Hello!'}],
+  },
+  stream=True,
+)
+
+full_text = ''
+for line in response.iter_lines():
+  if line.startswith(b'data: ') and line != b'data: [DONE]':
+    try:
+      json_data = json.loads(line[6:])
+      text = json_data['choices'][0]['delta'].get('content', '')
+      full_text += text
+      print(text, end='', flush=True)
+    except: pass
+
+print('\n\nFinal response:', full_text)
+```
+
+---
+
+## Supported Models
+
+| Model | Provider | Speed | Cost (per msg) |
+|-------|----------|-------|---|
+| claude-opus-4-7 | Anthropic | Slower | 2 credits |
+| claude-sonnet-4-6 | Anthropic | Balanced | 2 credits |
+| claude-haiku-4-5 | Anthropic | Fast | 2 credits |
+| gemini-3.1-pro | Google | Balanced | 2 credits |
+| gemini-3-pro | Google | Balanced | 2 credits |
+| gemini-3-flash | Google | Fast | 2 credits |
+| gpt-5-5 | OpenAI | Slower | 2 credits |
+| gpt-5-4 | OpenAI | Balanced | 2 credits |
+| gpt-5-2 | OpenAI | Fast | 2 credits |
+
+---
+
+## Tips
+
+- **Streaming:** Always use SSE parsing for live UI updates
+- **Web Search:** Adds latency (5–10s) but gives current info
+- **Tools:** Enable `generate_image` to let the model create images mid-conversation
+- **Context:** Keep messages < 100k tokens for fastest response
+- **Max Tokens:** 16384 is the ceiling; higher = slower response

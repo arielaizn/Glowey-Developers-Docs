@@ -1,0 +1,433 @@
+# Python Examples
+
+Complete examples using `requests` and `httpx`.
+
+## Setup
+
+### Using Requests
+
+```bash
+pip install requests
+```
+
+```python
+import requests
+
+token = 'glow_sk_YOUR_TOKEN_HERE'
+base_url = 'https://glowey.app/api'
+
+headers = {
+    'Authorization': f'Bearer {token}',
+    'Content-Type': 'application/json',
+}
+```
+
+### Using httpx (Async)
+
+```bash
+pip install httpx
+```
+
+```python
+import httpx
+
+client = httpx.AsyncClient(
+    base_url='https://glowey.app/api',
+    headers={'Authorization': 'Bearer glow_sk_YOUR_TOKEN_HERE'},
+)
+```
+
+---
+
+## Image Generation
+
+### Requests (Blocking)
+
+```python
+import requests
+import time
+
+def generate_image():
+    token = 'glow_sk_YOUR_TOKEN_HERE'
+    
+    # 1. Submit request
+    res = requests.post(
+        'https://glowey.app/api/generate',
+        headers={'Authorization': f'Bearer {token}'},
+        json={
+            'modelId': 'flux-pro',
+            'prompt': 'a serene lake at sunset, mountains in background',
+            'resolution': '2K',
+            'aspectRatio': '16:9',
+        }
+    )
+    
+    if res.status_code != 200:
+        print(f"Submit error: {res.json()}")
+        return
+    
+    task_id = res.json()['taskId']
+    print(f"Generation submitted, taskId: {task_id}")
+    
+    # 2. Poll for completion
+    while True:
+        time.sleep(2)
+        status_res = requests.get(
+            f'https://glowey.app/api/generate/status?taskId={task_id}',
+            headers={'Authorization': f'Bearer {token}'}
+        )
+        
+        status = status_res.json()
+        print(f"Status: {status['state']}")
+        
+        if status['state'] != 'pending':
+            break
+    
+    if status['state'] == 'fail':
+        print(f"Generation failed: {status.get('error')}")
+        return
+    
+    image_url = status['output']['images'][0]['url']
+    print(f"Image URL: {image_url}")
+    return image_url
+
+generate_image()
+```
+
+### Requests with Class Wrapper
+
+```python
+import requests
+import time
+
+class GloweyClient:
+    def __init__(self, token):
+        self.token = token
+        self.base_url = 'https://glowey.app/api'
+        self.headers = {
+            'Authorization': f'Bearer {token}',
+            'Content-Type': 'application/json',
+        }
+    
+    def request(self, method, path, json=None):
+        url = f'{self.base_url}{path}'
+        res = requests.request(method, url, headers=self.headers, json=json)
+        
+        if res.status_code >= 400:
+            print(f"Error: {res.json()}")
+            raise Exception(f"HTTP {res.status_code}")
+        
+        return res.json()
+    
+    def generate_image(self, model_id, prompt, resolution='1K'):
+        return self.request('POST', '/generate', {
+            'modelId': model_id,
+            'prompt': prompt,
+            'resolution': resolution,
+        })
+    
+    def check_image_status(self, task_id):
+        return self.request('GET', f'/generate/status?taskId={task_id}')
+    
+    def wait_for_completion(self, task_id, poll_interval=2):
+        while True:
+            status = self.check_image_status(task_id)
+            print(f"Status: {status['state']}")
+            
+            if status['state'] != 'pending':
+                return status
+            
+            time.sleep(poll_interval)
+
+# Usage
+client = GloweyClient('glow_sk_YOUR_TOKEN_HERE')
+result = client.generate_image('flux-pro', 'a cat')
+final_status = client.wait_for_completion(result['taskId'])
+print(f"Image: {final_status['output']['images'][0]['url']}")
+```
+
+---
+
+## Video Generation
+
+```python
+import requests
+import time
+
+def generate_video():
+    token = 'glow_sk_YOUR_TOKEN_HERE'
+    
+    # Submit
+    res = requests.post(
+        'https://glowey.app/api/video/generate',
+        headers={'Authorization': f'Bearer {token}'},
+        json={
+            'modelId': 'seedance-2-fast',
+            'prompt': 'a robot dancing in a neon-lit city',
+            'duration': 5,
+            'resolution': '720p',
+        }
+    )
+    
+    task_id = res.json()['taskId']
+    print(f"Video task: {task_id}")
+    
+    # Poll (every 5 seconds)
+    while True:
+        time.sleep(5)
+        status = requests.get(
+            f'https://glowey.app/api/video/status?taskId={task_id}',
+            headers={'Authorization': f'Bearer {token}'}
+        ).json()
+        
+        print(f"Status: {status['state']}")
+        if status['state'] != 'pending':
+            break
+    
+    print(f"Video URL: {status['output']['video_url']}")
+
+generate_video()
+```
+
+---
+
+## Chat with Streaming
+
+```python
+import requests
+
+def chat_stream():
+    token = 'glow_sk_YOUR_TOKEN_HERE'
+    
+    res = requests.post(
+        'https://glowey.app/api/chat',
+        headers={'Authorization': f'Bearer {token}'},
+        json={
+            'model': 'claude-opus-4-7',
+            'messages': [
+                {'role': 'user', 'content': 'Explain quantum computing in simple terms'}
+            ],
+            'webSearch': False,
+        },
+        stream=True,
+    )
+    
+    for line in res.iter_lines():
+        if line.startswith(b'data: ') and line != b'data: [DONE]':
+            try:
+                import json
+                data = json.loads(line[6:])
+                chunk = data['choices'][0]['delta'].get('content', '')
+                if chunk:
+                    print(chunk, end='', flush=True)
+            except:
+                pass
+    
+    print()
+
+chat_stream()
+```
+
+---
+
+## Music Generation
+
+```python
+import requests
+import time
+
+def generate_music():
+    token = 'glow_sk_YOUR_TOKEN_HERE'
+    
+    # Submit
+    res = requests.post(
+        'https://glowey.app/api/audio/music',
+        headers={'Authorization': f'Bearer {token}'},
+        json={
+            'prompt': 'upbeat electronic dance track with synthesizers',
+            'model': 'V5',
+            'customMode': False,
+        }
+    )
+    
+    task_id = res.json()['taskId']
+    print(f"Music task: {task_id}")
+    
+    # Poll
+    while True:
+        time.sleep(10)
+        status = requests.get(
+            f'https://glowey.app/api/audio/music/status?taskId={task_id}',
+            headers={'Authorization': f'Bearer {token}'}
+        ).json()
+        
+        print(f"Status: {status['state']}")
+        if status['state'] != 'pending':
+            break
+    
+    print(f"Audio URL: {status['output']['audio_url']}")
+
+generate_music()
+```
+
+---
+
+## Sound Effects
+
+```python
+import requests
+
+def generate_sfx():
+    token = 'glow_sk_YOUR_TOKEN_HERE'
+    
+    res = requests.post(
+        'https://glowey.app/api/audio/sfx',
+        headers={'Authorization': f'Bearer {token}'},
+        json={
+            'text': 'heavy door slamming followed by three gunshots',
+            'duration_seconds': 3,
+        }
+    )
+    
+    result = res.json()
+    if result['success']:
+        print(f"SFX URL: {result['audioUrls'][0]}")
+    else:
+        print(f"Error: {result}")
+
+generate_sfx()
+```
+
+---
+
+## Error Handling
+
+### Retry with Exponential Backoff
+
+```python
+import requests
+import time
+
+def request_with_retry(url, method='POST', json=None, max_retries=3, token=None):
+    headers = {'Authorization': f'Bearer {token}'}
+    
+    for attempt in range(max_retries):
+        try:
+            res = requests.request(method, url, headers=headers, json=json)
+            
+            if res.status_code == 429:
+                error = res.json()
+                wait = error.get('retryAfter', 2 ** attempt)
+                print(f"Rate limited. Waiting {wait}s...")
+                time.sleep(wait)
+                continue
+            
+            if res.status_code == 402:
+                error = res.json()
+                raise Exception(
+                    f"Insufficient credits. Need {error['required']}, have {error['current']}"
+                )
+            
+            if res.status_code >= 400:
+                raise Exception(f"HTTP {res.status_code}: {res.text}")
+            
+            return res
+        
+        except Exception as e:
+            if attempt < max_retries - 1:
+                wait = 2 ** attempt
+                print(f"Attempt {attempt + 1} failed. Waiting {wait}s...")
+                time.sleep(wait)
+            else:
+                raise
+
+# Usage
+res = request_with_retry(
+    'https://glowey.app/api/generate',
+    json={'modelId': 'flux-pro', 'prompt': 'a cat'},
+    token='glow_sk_YOUR_TOKEN_HERE'
+)
+```
+
+---
+
+## Async (httpx)
+
+```python
+import httpx
+import asyncio
+
+async def generate_image_async():
+    async with httpx.AsyncClient(
+        base_url='https://glowey.app/api',
+        headers={'Authorization': 'Bearer glow_sk_YOUR_TOKEN_HERE'},
+    ) as client:
+        # Submit
+        res = await client.post('/generate', json={
+            'modelId': 'flux-pro',
+            'prompt': 'a cat',
+            'resolution': '2K',
+        })
+        
+        task_id = res.json()['taskId']
+        print(f"Task: {task_id}")
+        
+        # Poll
+        while True:
+            await asyncio.sleep(2)
+            status = await client.get(f'/generate/status?taskId={task_id}')
+            state = status.json()['state']
+            print(f"Status: {state}")
+            
+            if state != 'pending':
+                break
+        
+        return status.json()['output']['images'][0]['url']
+
+url = asyncio.run(generate_image_async())
+print(f"Image: {url}")
+```
+
+---
+
+## Async Streaming Chat
+
+```python
+import httpx
+import asyncio
+import json
+
+async def chat_stream_async():
+    async with httpx.AsyncClient(
+        base_url='https://glowey.app/api',
+        headers={'Authorization': 'Bearer glow_sk_YOUR_TOKEN_HERE'},
+    ) as client:
+        async with client.stream(
+            'POST',
+            '/chat',
+            json={
+                'model': 'claude-opus-4-7',
+                'messages': [{'role': 'user', 'content': 'Hello!'}],
+            }
+        ) as res:
+            async for line in res.aiter_lines():
+                if line.startswith('data: ') and line != 'data: [DONE]':
+                    try:
+                        data = json.loads(line[6:])
+                        chunk = data['choices'][0]['delta'].get('content', '')
+                        if chunk:
+                            print(chunk, end='', flush=True)
+                    except:
+                        pass
+
+asyncio.run(chat_stream_async())
+```
+
+---
+
+## Tips
+
+- **Polling Interval:** 2–5s for images, 10s for music
+- **Error Codes:** Always check for 402 (insufficient credits) and 429 (rate limit)
+- **Streaming:** Use `stream=True` for chat to avoid buffering large responses
+- **Async:** Use `httpx` for concurrent operations

@@ -1,0 +1,193 @@
+# Error Responses
+
+All errors return JSON with an `error` field describing the issue.
+
+## HTTP Status Codes
+
+| Status | Name | Meaning |
+|--------|------|---------|
+| 400 | Bad Request | Missing or invalid parameters |
+| 401 | Unauthorized | Missing, invalid, or revoked token |
+| 402 | Payment Required | Insufficient credits |
+| 429 | Too Many Requests | Rate limit exceeded |
+| 500 | Internal Server Error | Backend error (transient) |
+| 502 | Bad Gateway | AI provider error |
+| 503 | Service Unavailable | API unavailable |
+| 504 | Gateway Timeout | Request timed out |
+
+## Error Response Format
+
+All errors return JSON:
+
+```json
+{
+  "error": "error_code_or_message",
+  "details": "optional human-readable explanation"
+}
+```
+
+## Common Errors
+
+### 400 Bad Request
+
+Missing or invalid parameters in the request body.
+
+```json
+{
+  "error": "modelId and prompt are required"
+}
+```
+
+**Fix:** Check the endpoint documentation for required fields and types.
+
+### 401 Unauthorized
+
+Token is missing, invalid, or revoked.
+
+```json
+{
+  "error": "Unauthorized"
+}
+```
+
+**Fix:**
+- Include `Authorization: Bearer glow_sk_YOUR_TOKEN_HERE` header
+- Verify the token is valid and not revoked
+- Create a new token if needed
+
+### 402 Payment Required
+
+Token owner has insufficient credits for this request.
+
+```json
+{
+  "error": "insufficient_credits",
+  "required": 15,
+  "current": 8
+}
+```
+
+| Field | Meaning |
+|-------|---------|
+| `required` | Credits needed for this request |
+| `current` | Credits remaining in account |
+
+**Fix:**
+- Purchase more credits at [glowey.app/me/billing](https://glowey.app/me/billing)
+- Reduce request complexity (e.g., lower resolution)
+- Use a cheaper model
+
+### 429 Too Many Requests
+
+Exceeded rate limit.
+
+```json
+{
+  "error": "rate_limited",
+  "limit": 60,
+  "window": "1m",
+  "retryAfter": 30
+}
+```
+
+**Fix:** Wait `retryAfter` seconds before retrying.
+
+### 500 Internal Server Error
+
+Backend error. Request may or may not have been processed.
+
+```json
+{
+  "error": "Internal server error"
+}
+```
+
+**Fix:**
+- Retry after a few seconds
+- If persistent, contact support
+
+### 502 Bad Gateway
+
+AI provider (KIE, fal.ai, Suno) returned an error.
+
+```json
+{
+  "error": "Generation failed",
+  "details": "Model provider error"
+}
+```
+
+**Fix:** Retry or try a different model.
+
+### 503 Service Unavailable
+
+API is temporarily down for maintenance.
+
+```json
+{
+  "error": "Service unavailable"
+}
+```
+
+**Fix:** Retry after a few minutes.
+
+### 504 Gateway Timeout
+
+Request took too long and timed out.
+
+```json
+{
+  "error": "Request timed out"
+}
+```
+
+**Fix:** Retry, or use a faster model variant if available.
+
+## Handling Errors in Code
+
+### JavaScript / Node.js
+
+```javascript
+const response = await fetch('https://glowey.app/api/generate', {
+  method: 'POST',
+  headers: {
+    'Authorization': 'Bearer glow_sk_YOUR_TOKEN_HERE',
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({ modelId: 'flux-pro', prompt: 'a cat' }),
+});
+
+if (!response.ok) {
+  const error = await response.json();
+  if (response.status === 402) {
+    console.error(`Need ${error.required} credits, have ${error.current}`);
+  } else if (response.status === 429) {
+    console.error(`Rate limited. Wait ${error.retryAfter}s`);
+  }
+  return;
+}
+
+const result = await response.json();
+```
+
+### Python
+
+```python
+import requests
+import time
+
+response = requests.post(
+  'https://glowey.app/api/generate',
+  headers={'Authorization': 'Bearer glow_sk_YOUR_TOKEN_HERE'},
+  json={'modelId': 'flux-pro', 'prompt': 'a cat'},
+)
+
+if response.status_code == 429:
+  retry_after = response.json()['retryAfter']
+  print(f'Rate limited. Waiting {retry_after}s...')
+  time.sleep(retry_after)
+  # retry...
+elif response.status_code == 402:
+  error = response.json()
+  print(f"Need {error['required']} credits, have {error['current']}")
+```

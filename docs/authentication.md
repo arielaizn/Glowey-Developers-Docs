@@ -1,0 +1,57 @@
+# Authentication
+
+All Glowey API calls require a Bearer token in the `Authorization` header.
+
+## Token Format
+
+Tokens are created in [glowey.app/me/settings](https://glowey.app/me/settings) and follow the format:
+
+```
+glow_sk_<32 random characters>
+```
+
+Example:
+```
+glow_sk_aBcDeFgHiJkLmNoPqRsTuVwXyZ123456
+```
+
+**Important:** Tokens are shown only once at creation. Store them securely. If lost, create a new token.
+
+## Usage
+
+Include the token in the `Authorization` header of every request:
+
+```bash
+curl -H "Authorization: Bearer glow_sk_YOUR_TOKEN_HERE" \
+  https://glowey.app/api/generate \
+  ...
+```
+
+Or in code:
+
+```javascript
+fetch('https://glowey.app/api/generate', {
+  method: 'POST',
+  headers: {
+    'Authorization': 'Bearer glow_sk_YOUR_TOKEN_HERE',
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({ modelId: 'flux-pro', prompt: 'a cat' }),
+});
+```
+
+## Invalid or Missing Tokens
+
+- **Missing header:** Returns `401 Unauthorized`
+- **Invalid token:** Returns `401 Unauthorized`
+- **Revoked token:** Returns `401 Unauthorized`
+
+## Token Management
+
+You can manage tokens only via the browser (not the API):
+
+- **Create:** [glowey.app/me/settings](https://glowey.app/me/settings) → Developer API → Create token
+- **View:** Lists prefix + last used date (full secret never stored)
+- **Revoke:** Revoked tokens immediately reject all requests
+
+Tokens cannot be updated—revoke and create a new one if needed.

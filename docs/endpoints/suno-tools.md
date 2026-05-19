@@ -1,0 +1,355 @@
+# Suno Post-Processing Tools
+
+Advanced music editing and enhancement tools for Suno-generated music.
+
+## Available Tools
+
+### Lyrics
+
+**POST** `/api/audio/suno/lyrics`
+
+Generate or enhance lyrics for a song.
+
+Request:
+```json
+{
+  "taskId": "task_music_xyz",
+  "prompt": "Write a chorus about overcoming challenges"
+}
+```
+
+Response:
+```json
+{
+  "success": true,
+  "lyrics": "Verse 1: Rise above the pain...",
+  "taskId": "task_music_xyz"
+}
+```
+
+Cost: 5 credits
+
+---
+
+### Extend
+
+**POST** `/api/audio/suno/extend`
+
+Extend a music track to a longer duration.
+
+Request:
+```json
+{
+  "taskId": "task_music_xyz",
+  "duration": 180
+}
+```
+
+Response:
+```json
+{
+  "taskId": "task_extend_abc",
+  "state": "pending"
+}
+```
+
+Cost: 10 credits  
+Poll: `GET /api/audio/suno/extend/status?taskId=...`
+
+---
+
+### Stems
+
+**POST** `/api/audio/suno/stems`
+
+Extract vocal, instrumental, and drum stems from music.
+
+Request:
+```json
+{
+  "taskId": "task_music_xyz"
+}
+```
+
+Response:
+```json
+{
+  "success": true,
+  "vocals": "https://storage.glowey.app/stem_vocals.mp3",
+  "instrumental": "https://storage.glowey.app/stem_inst.mp3",
+  "drums": "https://storage.glowey.app/stem_drums.mp3"
+}
+```
+
+Cost: 8 credits
+
+---
+
+### Cover
+
+**POST** `/api/audio/suno/cover`
+
+Generate a cover version of a song in a different style.
+
+Request:
+```json
+{
+  "taskId": "task_music_xyz",
+  "style": "jazz piano"
+}
+```
+
+Response:
+```json
+{
+  "taskId": "task_cover_xyz",
+  "state": "pending"
+}
+```
+
+Cost: 12 credits  
+Poll: `GET /api/audio/suno/cover/status?taskId=...`
+
+---
+
+### Music Video
+
+**POST** `/api/audio/suno/music-video`
+
+Generate a music video from audio.
+
+Request:
+```json
+{
+  "taskId": "task_music_xyz",
+  "style": "cinematic",
+  "duration": 60
+}
+```
+
+Response:
+```json
+{
+  "taskId": "task_mv_xyz",
+  "state": "pending"
+}
+```
+
+Cost: 20 credits  
+Poll: `GET /api/audio/suno/music-video/status?taskId=...`
+
+---
+
+### Replace Section
+
+**POST** `/api/audio/suno/replace-section`
+
+Replace a section of music (e.g., intro, verse, chorus).
+
+Request:
+```json
+{
+  "taskId": "task_music_xyz",
+  "section": "chorus",
+  "prompt": "Add more energy with electric guitars"
+}
+```
+
+Response:
+```json
+{
+  "taskId": "task_replace_xyz",
+  "state": "pending"
+}
+```
+
+Cost: 10 credits  
+Poll: `GET /api/audio/suno/replace-section/status?taskId=...`
+
+---
+
+### Add Instrumental
+
+**POST** `/api/audio/suno/add-instrumental`
+
+Add instrumental layers (drums, bass, synth) to existing music.
+
+Request:
+```json
+{
+  "taskId": "task_music_xyz",
+  "layers": ["drums", "bass"]
+}
+```
+
+Response:
+```json
+{
+  "taskId": "task_inst_xyz",
+  "state": "pending"
+}
+```
+
+Cost: 8 credits  
+Poll: `GET /api/audio/suno/add-instrumental/status?taskId=...`
+
+---
+
+### Add Vocals
+
+**POST** `/api/audio/suno/add-vocals`
+
+Add vocal layers to instrumental music.
+
+Request:
+```json
+{
+  "taskId": "task_music_xyz",
+  "vocalType": "harmony",
+  "gender": "f"
+}
+```
+
+Response:
+```json
+{
+  "taskId": "task_vocals_xyz",
+  "state": "pending"
+}
+```
+
+Cost: 10 credits  
+Poll: `GET /api/audio/suno/add-vocals/status?taskId=...`
+
+---
+
+### Boost Style
+
+**POST** `/api/audio/suno/boost-style`
+
+Enhance specific style characteristics (energy, tempo, instruments).
+
+Request:
+```json
+{
+  "taskId": "task_music_xyz",
+  "boosts": ["energy", "tempo"]
+}
+```
+
+Response:
+```json
+{
+  "taskId": "task_boost_xyz",
+  "state": "pending"
+}
+```
+
+Cost: 6 credits  
+Poll: `GET /api/audio/suno/boost-style/status?taskId=...`
+
+---
+
+### Upload Cover Art
+
+**POST** `/api/audio/suno/upload-cover`
+
+Upload custom cover art for music.
+
+Request:
+```json
+{
+  "taskId": "task_music_xyz",
+  "imageUrl": "https://example.com/cover.jpg"
+}
+```
+
+Response:
+```json
+{
+  "success": true,
+  "taskId": "task_music_xyz"
+}
+```
+
+Cost: 0 credits (included in music generation)
+
+---
+
+### Upload Extend Audio
+
+**POST** `/api/audio/suno/upload-extend`
+
+Use custom audio to extend a song.
+
+Request:
+```json
+{
+  "taskId": "task_music_xyz",
+  "audioUrl": "https://example.com/continuation.mp3"
+}
+```
+
+Response:
+```json
+{
+  "taskId": "task_extend_xyz",
+  "state": "pending"
+}
+```
+
+Cost: 10 credits  
+Poll: `GET /api/audio/suno/upload-extend/status?taskId=...`
+
+---
+
+### WAV Export
+
+**POST** `/api/audio/suno/wav`
+
+Export music as high-quality WAV format.
+
+Request:
+```json
+{
+  "taskId": "task_music_xyz"
+}
+```
+
+Response:
+```json
+{
+  "success": true,
+  "wavUrl": "https://storage.glowey.app/music_xyz.wav",
+  "bitDepth": 24,
+  "sampleRate": 44100
+}
+```
+
+Cost: 0 credits (included in music generation)
+
+---
+
+## General Notes
+
+- **Async Tools:** Most tools return a `taskId` for polling (use `GET /api/audio/suno/{tool}/status?taskId=...`)
+- **Polling:** Check status every 5–10 seconds
+- **Sync Tools:** Some (lyrics, stems, wav) return results immediately
+- **Cost:** Varies per tool (6–20 credits)
+- **Authentication:** All require Bearer token
+
+## Workflow Example
+
+1. Generate music: `POST /api/audio/music` → get `taskId`
+2. Check generation: `GET /api/audio/music/status?taskId=...` (wait for success)
+3. Extract stems: `POST /api/audio/suno/stems` with `taskId`
+4. Extend music: `POST /api/audio/suno/extend` with `taskId` → get new `taskId`
+5. Check extension: `GET /api/audio/suno/extend/status?taskId=...`
+
+---
+
+## Error Handling
+
+All tools return standard error codes (400, 401, 402, 429, 500, 502). See [../errors.md](../errors.md).
+
+Async tools that fail will mark the task as `state: "fail"` with an error message.

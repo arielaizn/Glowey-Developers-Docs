@@ -1,0 +1,202 @@
+# Music Generation
+
+Generate original music with Suno, plus post-processing tools (lyrics, extend, stems, etc.).
+
+## Generate Music
+
+**POST** `/api/audio/music`
+
+Submit a music generation request. Returns a `taskId` for polling.
+
+### Authentication
+
+Bearer token required.
+
+### Request Body
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `prompt` | string | Yes | Music description or lyrics. Max 5000 chars in custom mode, 500 in simple mode |
+| `model` | string | No | Suno model: `V3_5`, `V4`, `V4_5`, `V4_5PLUS`, `V4_5ALL`, `V5`, `V5_5`. Default: `V4_5` |
+| `customMode` | boolean | No | Enable advanced controls (title, style, etc.). Auto-enabled if style or title provided |
+| `instrumental` | boolean | No | Generate without vocals. Default: false |
+| `style` | string | No | Music style (custom mode). E.g., "lo-fi hip-hop", "synth pop", "orchestral" |
+| `title` | string | No | Song title (custom mode). Auto-generated from prompt if omitted |
+| `negativeTags` | string | No | Styles to avoid. E.g., "vocals, drums" |
+| `vocalGender` | string | No | Vocal gender: `m` (male) or `f` (female). Ignored if instrumental |
+| `styleWeight` | number | No | Style strength: 0–1. Default: 0.7 |
+| `weirdnessConstraint` | number | No | Creativity limit: 0–1. Higher = more experimental. Default: 0.5 |
+| `audioWeight` | number | No | Audio reference strength: 0–1 (when using audio reference) |
+| `personaId` | string | No | Persona ID (V5/V5_5 only). Available from [glowey.app/me/suno](https://glowey.app/me/suno) |
+| `personaModel` | string | No | Persona voice model: `V5` or `V5_5` |
+
+### Response
+
+```json
+{
+  "taskId": "task_mus890ghi"
+}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `taskId` | string | Unique task ID for polling |
+
+### Credit Cost
+
+Fixed per model version. See [../credits-and-pricing.md#music-generation](../credits-and-pricing.md#music-generation).
+
+- Suno V4.x: 15 credits
+- Suno V5.x: 20 credits
+
+### Errors
+
+- `400` – Missing `prompt` or invalid parameters
+- `401` – Unauthorized
+- `402` – Insufficient credits
+- `429` – Rate limited
+- `500` – Server error (credits refunded)
+- `502` – AI provider error (credits refunded)
+
+### Example Request (Simple Mode)
+
+```bash
+curl -X POST https://glowey.app/api/audio/music \
+  -H "Authorization: Bearer glow_sk_YOUR_TOKEN_HERE" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "prompt": "upbeat electronic dance track with synthesizers and a driving beat",
+    "model": "V5"
+  }'
+```
+
+### Example Request (Custom Mode)
+
+```bash
+curl -X POST https://glowey.app/api/audio/music \
+  -H "Authorization: Bearer glow_sk_YOUR_TOKEN_HERE" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "prompt": "Verse:\nWalking through the city lights\nNeon dreams and endless nights\n\nChorus:\nWe are alive, we are free\nDancing through infinity",
+    "customMode": true,
+    "style": "synthwave, 80s retro",
+    "title": "Neon Dreams",
+    "model": "V5_5",
+    "instrumental": false,
+    "vocalGender": "f",
+    "styleWeight": 0.8
+  }'
+```
+
+### Example Response
+
+```json
+{
+  "taskId": "task_mus890ghi"
+}
+```
+
+---
+
+## Check Music Status
+
+**GET** `/api/audio/music/status`
+
+Poll for the result of a music generation task.
+
+### Authentication
+
+Bearer token required.
+
+### Query Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `taskId` | string | Yes | Task ID from generate response |
+
+### Response (Pending)
+
+```json
+{
+  "state": "pending",
+  "taskId": "task_mus890ghi"
+}
+```
+
+### Response (Success)
+
+```json
+{
+  "state": "success",
+  "taskId": "task_mus890ghi",
+  "output": {
+    "audio_url": "https://storage.glowey.app/music_xyz789.mp3",
+    "cover_image_url": "https://storage.glowey.app/cover_xyz789.jpg"
+  }
+}
+```
+
+### Response (Failed)
+
+```json
+{
+  "state": "fail",
+  "taskId": "task_mus890ghi",
+  "error": "Generation failed"
+}
+```
+
+### Errors
+
+- `400` – Missing `taskId`
+- `401` – Unauthorized
+- `429` – Rate limited
+- `500` – Server error
+
+### Example Request
+
+```bash
+curl "https://glowey.app/api/audio/music/status?taskId=task_mus890ghi" \
+  -H "Authorization: Bearer glow_sk_YOUR_TOKEN_HERE"
+```
+
+### Polling Strategy
+
+1. Submit music request → get `taskId`
+2. Poll every 5–10 seconds
+3. When `state` is `success` or `fail`, stop
+4. Download audio from `output.audio_url`
+
+### Typical Time to Completion
+
+- V4/V4.5: 30–120 seconds
+- V5/V5.5: 60–180 seconds
+
+---
+
+## Suno Post-Processing Tools
+
+See [./suno-tools.md](./suno-tools.md) for:
+
+- **Lyrics** – Generate or enhance song lyrics
+- **Extend** – Extend music length
+- **Stems** – Extract vocal/instrumental stems
+- **Cover** – Generate cover versions
+- **Music Video** – Create a music video
+- **Replace Section** – Swap song sections
+- **Add Instrumental** – Add instrumental layer
+- **Add Vocals** – Add vocal layer
+- **Boost Style** – Enhance style characteristics
+- **Upload Cover** – Upload custom cover art
+- **Upload Extend** – Upload audio to extend from
+- **WAV Export** – Export as high-quality WAV
+
+---
+
+## Tips
+
+- **Custom Mode** is best for structured songs (verse/chorus)
+- **Simple Mode** works for styles, descriptions, vibes
+- **Persona** (V5 only) lets you create consistent voice characters
+- **Negative Tags** prevent unwanted elements (e.g., "no rapping, no metal")
+- **Prompt Length:** 500 chars (simple), 5000 chars (custom)

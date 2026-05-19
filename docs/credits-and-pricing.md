@@ -1,0 +1,152 @@
+# Credits & Pricing
+
+Every API call deducts credits from the token owner's account. Credits are purchased as part of a Glowey subscription.
+
+## Credit Costs
+
+Costs vary by model, quality, and duration. All prices below are in credits.
+
+### Image Generation
+
+| Model | 512 | 1K | 2K | 4K |
+|-------|-----|----|----|-----|
+| Nano Banana Pro | 5 | 8 | 12 | 20 |
+| Nano Banana 2 | 5 | 8 | 12 | 20 |
+| Soul 2.0 | 6 | 10 | 15 | 25 |
+| Soul Cinema | 6 | 10 | 15 | 25 |
+| GPT Image 2.0 | 9 | 15 | 23 | 38 |
+| GPT Image 1.5 | 9 | 15 | 23 | 38 |
+| Seedream 5 Lite | 5 | 8 | 12 | 20 |
+| Seedream 4.5 | 5 | 8 | 12 | 20 |
+| Glowey Popcorn | 3 | 5 | 8 | 13 |
+| Grok Imagine | 7 | 12 | 18 | 30 |
+| FLUX Schnell | 3 | 5 | 8 | 13 |
+| FLUX Dev | 5 | 8 | 12 | 20 |
+| FLUX Pro | 9 | 15 | 23 | 38 |
+| FLUX 2 Pro | 11 | 18 | 27 | 45 |
+| FLUX Kontext | 9 | 15 | 23 | 38 |
+| Imagen 4 | 7 | 12 | 18 | 30 |
+| Imagen 4 Fast | 5 | 8 | 12 | 20 |
+| Imagen 4 Ultra | 11 | 18 | 27 | 45 |
+| Ideogram V3 | 7 | 12 | 18 | 30 |
+| Qwen Text-to-Image | 5 | 8 | 12 | 20 |
+
+### Video Generation
+
+Costs = Base + (Duration × Per-Second) × Resolution Multiplier
+
+**Models:**
+
+| Model | Base | Per-Sec | Notes |
+|-------|------|---------|-------|
+| Seedance 2.0 | 25 | 6 | Supports 480p, 720p, 1080p |
+| Seedance 2.0 Fast | 12 | 3 | Supports 480p, 720p |
+| Kling 3.0 | 25 | 6 | Supports pro, 4K modes |
+| Kling 2.6 | 20 | 5 | Base only |
+| Veo 3.1 | 50 | 0 | Flat rate (5s only) |
+| Wan 2.7 | 12 | 3 | Supports 720p, 1080p |
+| Hailuo 02 | 30 | 0 | Flat rate (5s only) |
+| Grok Video | 15 | 4 | Supports 480p, 720p |
+| HappyHorse | 12 | 3 | Supports 720p, 1080p |
+| PixVerse 6 | 18 | 4 | Supports 720p, 1080p |
+| LTX Video | 8 | 0 | Flat rate (5s only) |
+
+**Resolution Multipliers:**
+
+| Resolution | Multiplier |
+|------------|------------|
+| 480p | 1.0 |
+| 720p | 1.25 |
+| 1080p | 1.5 |
+| pro (Kling 3) | 1.4 |
+| 4K | 3.0 |
+
+**Example:** Seedance 2.0 Fast, 5s, 720p = (12 + 5×3) × 1.25 = 56.25 → 57 credits (rounded up).
+
+### Lipsync
+
+| Model | Credits |
+|-------|---------|
+| Sync Lipsync v1 | 30 |
+| Sync Lipsync v2 | 40 |
+| Sync Lipsync v2 Pro | 60 |
+| Sync Lipsync v3 | 80 |
+| Veed Fabric | 25 |
+| Creatify Aurora | 25 |
+| Kling Avatar | 30 |
+
+### Music Generation
+
+| Model | Credits |
+|-------|---------|
+| Suno V4 (V4, V4.5, V4.5+, V4.5ALL) | 15 |
+| Suno V5 (V5, V5.5) | 20 |
+
+Post-processing tools (lyrics, extend, stems, etc.) have varying costs — typically 5–15 credits depending on operation.
+
+### Audio
+
+| Tool | Credits |
+|------|---------|
+| Sound Effects | 5 |
+| Voice Cloning | 30 |
+| Transcription | 3 |
+| ElevenLabs TTS | 10 |
+| Gemini Flash TTS | 5 |
+| Gemini Pro TTS | 10 |
+
+### Image Editing
+
+| Operation | Credits |
+|-----------|---------|
+| Enhance | 5 |
+| Remove Background | 5 |
+| Inpaint | 10 |
+| Expand | 8 |
+
+### Chat (LLM)
+
+Base cost: **2 credits** per message, plus modifiers:
+
+- Web search: +2 credits
+- Deep research: +4 credits
+- Image attachments: +1 credit
+
+Example: Chat with web search and image = 2 + 2 + 1 = 5 credits.
+
+## Subscription Tiers
+
+| Plan | Monthly Credits | Price |
+|------|-----------------|-------|
+| Free | 200 | Free |
+| Starter | 200 | $7/mo |
+| Plus | 1000 | $29/mo |
+| Ultra 3000 | 3000 | $79/mo |
+| Ultra 6000 | 6000 | $149/mo |
+| Ultra 9000 | 9000 | $199/mo |
+
+## Refunds
+
+If a request fails (500, 502 errors), credits are refunded and you can retry. If a status poll shows the task failed, remaining credits are refunded.
+
+## Checking Balance
+
+Insufficient credits returns:
+
+```json
+{
+  "error": "insufficient_credits",
+  "required": 15,
+  "current": 8
+}
+```
+
+Purchase credits at [glowey.app/me/billing](https://glowey.app/me/billing).
+
+## Rate of Consumption
+
+Each API request deducts credits **immediately**. Status polls (checking task progress) do not cost credits.
+
+## Enterprise Pricing
+
+Custom rates available for high-volume users. Contact [sales@glowey.app](mailto:sales@glowey.app).
