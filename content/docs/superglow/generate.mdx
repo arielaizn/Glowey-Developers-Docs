@@ -1,0 +1,168 @@
+---
+title: Image Generation (SuperGlow)
+description: Internal image generation endpoint used by the SuperGlow orchestrator.
+---
+
+# Image Generation (SuperGlow)
+
+The SuperGlow image generation endpoint is used internally by Hermes to generate images during multi-stage pipelines. It supports automatic model fallback to ensure reliability.
+
+## POST /api/superglow/generate
+
+Submit an image generation request. Returns a `taskId` for polling via the standard `/api/generate/status` endpoint.
+
+### Authentication
+
+Bearer token required.
+
+### Request Body
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `prompt` | string | Yes | Image description (max 2000 chars) |
+| `aspectRatio` | string | No | Aspect ratio: `1:1`, `16:9`, `9:16`. Default: `16:9` |
+| `refImageUrls` | string[] | No | Reference image URLs for image-to-image (uses first if multiple) |
+| `preferredModel` | string | No | Specific model ID. If provided, no fallback chain is used. |
+| `resolution` | string | No | Output quality: `512`, `1K`, `2K`, `4K`. Default: `2K` |
+
+### Response
+
+```json
+{
+  "taskId": "task_abc123xyz",
+  "strategy": "market",
+  "modelUsed": "imagegen_2_0"
+}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `taskId` | string | Unique task ID for polling status |
+| `strategy` | string | Strategy used (always `market` for SuperGlow) |
+| `modelUsed` | string | Model ID that accepted the request |
+
+### Model Selection
+
+SuperGlow uses an intelligent fallback chain to ensure generation succeeds:
+
+1. **Preferred Model** (if specified) — no fallback if this fails
+2. **Default Chain**:
+   - `imagegen_2_0` (GPT Image 2.0)
+   - `nano-banana-pro`
+   - `nano-banana-2`
+   - `imagen4-fast`
+   - `seedream-4-5`
+   - `gpt-image-1-5`
+
+If `preferredModel` is set, SuperGlow sticks to that model and does not attempt fallbacks. This ensures consistent styling within a multi-image run.
+
+### Errors
+
+- `400` – Missing `prompt` or invalid parameters
+- `401` – Unauthorized
+- `429` – Rate limited
+- `500` – All models in the fallback chain failed (rare)
+- `502` – Hermes service unavailable
+
+### Example Request
+
+```bash
+curl -X POST https://glowey.app/api/superglow/generate \
+  -H "Authorization: Bearer glow_sk_YOUR_TOKEN_HERE" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "prompt": "A serene Japanese garden with a wooden bridge, cherry blossoms, soft sunlight",
+    "aspectRatio": "16:9",
+    "resolution": "2K",
+    "preferredModel": "imagegen_2_0"
+  }'
+```
+
+### Example Response
+
+```json
+{
+  "taskId": "task_xyz789abc",
+  "strategy": "market",
+  "modelUsed": "imagegen_2_0"
+}
+```
+
+---
+
+## Poll for Status
+
+Use the `taskId` with the standard image status endpoint:
+
+**GET** `/api/generate/status?taskId=task_xyz789abc`
+
+See [Image Generation Status](/docs/endpoints/image#check-generation-status) for polling details and response shapes.
+
+### Example Status Check
+
+```bash
+curl "https://glowey.app/api/generate/status?taskId=task_xyz789abc" \
+  -H "Authorization: Bearer glow_sk_YOUR_TOKEN_HERE"
+```
+
+Response while pending:
+```json
+{
+  "state": "pending",
+  "taskId": "task_xyz789abc"
+}
+```
+
+Response on success:
+```json
+{
+  "state": "success",
+  "taskId": "task_xyz789abc",
+  "output": {
+    "images": [
+      {
+        "url": "https://storage.glowey.app/img_xyz789.jpg",
+        "seed": 42
+      }
+    ]
+  }
+}
+```
+
+---
+
+## Credit Costs
+
+Image generation within SuperGlow does **not** deduct credits immediately. Credits are deducted once per entire SuperGlow run via the `/api/superglow/charge` endpoint.
+
+See [Charge & Refund](/docs/superglow/charge-refund) for details.
+
+---
+
+## Model Fallback Behavior
+
+If your request specifies no `preferredModel`:
+
+1. SuperGlow tries the default fallback chain in order
+2. If a model fails, the next model in the chain is attempted
+3. Returns the first successful `taskId` along with the `modelUsed`
+
+If `preferredModel` is specified:
+
+1. SuperGlow uses **only** that model
+2. If the model fails, the request fails (no fallback)
+3. This ensures all images in a batch use the same model for visual consistency
+
+### Example with Preferred Model
+
+```bash
+curl -X POST https://glowey.app/api/superglow/generate \
+  -H "Authorization: Bearer glow_sk_YOUR_TOKEN_HERE" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "prompt": "A quantum computing visualization",
+    "preferredModel": "gpt-image-2-0"
+  }'
+```
+
+If `gpt-image-2-0` is down, the request fails immediately (no fallback).

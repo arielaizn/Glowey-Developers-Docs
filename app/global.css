@@ -1,17 +1,50 @@
 @import 'fumadocs-ui/style.css';
 
+/* ── Glowey brand palette ─────────────────────────────────────────────
+   Mirrors /Users/a1234/Glowey/app/globals.css. Primary is cyan #00D4FF
+   with a subtle violet companion in gradients (matches the multi-agent
+   accent used on gloweyai.com). */
+
 @layer utilities {
   .hero-gradient {
-    background: radial-gradient(ellipse at 50% 0%, rgba(255, 107, 53, 0.15) 0%, transparent 70%);
+    background:
+      radial-gradient(ellipse at 50% 0%, rgba(0, 212, 255, 0.18) 0%, transparent 70%),
+      radial-gradient(ellipse at 80% 30%, rgba(167, 139, 250, 0.10) 0%, transparent 60%);
+  }
+
+  .glowey-cta {
+    background: linear-gradient(135deg, #00D4FF 0%, #0099BB 100%);
+    color: #020304;
+    border-radius: 9999px;
+    font-weight: 700;
+    padding: 10px 20px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    box-shadow: 0 0 28px rgba(0, 212, 255, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.22);
+    transition: filter 0.18s, box-shadow 0.18s;
+    text-decoration: none;
+  }
+  .glowey-cta:hover {
+    filter: brightness(1.1);
+    box-shadow: 0 0 44px rgba(0, 212, 255, 0.6),
+                inset 0 1px 0 rgba(255, 255, 255, 0.22);
   }
 }
 
 :root {
-  --color-fd-primary: #FF6B35;
-  --color-fd-primary-foreground: #ffffff;
+  --color-fd-primary: #00D4FF;
+  --color-fd-primary-foreground: #020304;
 }
 
 .dark {
-  --color-fd-primary: #FF6B35;
-  --color-fd-primary-foreground: #ffffff;
+  --color-fd-primary: #00D4FF;
+  --color-fd-primary-foreground: #020304;
+  /* Pull Fumadocs' background closer to the main Glowey app */
+  --color-fd-background: #030407;
+  --color-fd-card: #0A0B0E;
+  --color-fd-muted: #111318;
+  --color-fd-border: rgba(255, 255, 255, 0.08);
+  --color-fd-ring: rgba(0, 212, 255, 0.35);
 }

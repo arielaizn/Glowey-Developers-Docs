@@ -1,0 +1,130 @@
+---
+title: SuperGlow Overview
+description: Multi-agent creative pipeline orchestrator for image, video, music, lipsync, and TTS generation.
+---
+
+# SuperGlow
+
+SuperGlow is Glowey's multi-agent creative-pipeline orchestrator. Given a single text prompt or conversation, it intelligently decides which generators to invoke (image, video, music, lipsync, TTS), submits them in parallel or sequential chains, tracks completion, and streams results back in real-time.
+
+From a developer's perspective, SuperGlow is a higher-level abstraction built on top of Glowey's individual generation endpoints (`/api/generate`, `/api/video/generate`, etc.). It adds orchestration logic, conversation persistence, and SSE streaming.
+
+## Mental Model
+
+### Hermes (The Orchestrator)
+
+At the heart of SuperGlow is **Hermes** — an LLM-powered router that:
+
+1. **Receives** a text prompt or conversation history
+2. **Analyzes** intent (does the user want a video? images for a montage? music background?)
+3. **Selects and chains** the right generation tools
+4. **Submits** jobs in parallel where safe, waits for dependencies where needed
+5. **Streams back** SSE events in real-time (text deltas, tool invocations, file URLs)
+
+### Conversations
+
+Each SuperGlow session is a **conversation** — a persistent record that tracks:
+- Conversation metadata (title, slug, created/updated timestamps)
+- Generation requests and results
+- Script text, video clips, music tracks
+- Final output URL
+
+Conversations are scoped to the authenticated user and can be listed, updated, or deleted.
+
+### Generation Tasks
+
+SuperGlow's per-stage endpoints (`/api/superglow/generate`, `/api/superglow/video`, etc.) are **credit-free** from a user perspective. Credits are deducted once per run via the `/api/superglow/charge` endpoint, which computes the total cost across all stages.
+
+## Architecture
+
+```
+User Prompt / Conversation
+    ↓
+POST /api/superglow/hermes
+    ↓
+Hermes (LLM orchestrator)
+    ↓
+    ├─→ /api/superglow/generate (image)
+    ├─→ /api/superglow/video (video)
+    ├─→ /api/superglow/music (Suno)
+    ├─→ /api/superglow/lipsync (fal.ai)
+    └─→ /api/superglow/tts (ElevenLabs)
+    ↓
+GET /api/superglow/hermes/stream?jobId=...
+    ↓
+SSE Stream (text deltas + tool_call events)
+    ↓
+Final Results → Conversation Record
+```
+
+## Quick Start
+
+1. **Create or list conversations**
+   ```bash
+   curl -X POST https://glowey.app/api/superglow/conversations \
+     -H "Authorization: Bearer glow_sk_YOUR_TOKEN_HERE" \
+     -H "Content-Type: application/json" \
+     -d '{"title": "My first SuperGlow video"}'
+   ```
+
+2. **Send a prompt to Hermes**
+   ```bash
+   curl -X POST https://glowey.app/api/superglow/hermes \
+     -H "Authorization: Bearer glow_sk_YOUR_TOKEN_HERE" \
+     -H "Content-Type: application/json" \
+     -d '{
+       "conversation_id": "conv_abc123",
+       "message": "Create an animated explainer video about renewable energy"
+     }'
+   ```
+
+3. **Stream results**
+   ```bash
+   curl "https://glowey.app/api/superglow/hermes/stream?jobId=job_xyz789" \
+     -H "Authorization: Bearer glow_sk_YOUR_TOKEN_HERE"
+   ```
+
+4. **Charge the user** (once per run)
+   ```bash
+   curl -X POST https://glowey.app/api/superglow/charge \
+     -H "Authorization: Bearer glow_sk_YOUR_TOKEN_HERE" \
+     -H "Content-Type: application/json" \
+     -d '{
+       "runId": "run_12345",
+       "shotCount": 1,
+       "videoModel": "seedance-2",
+       "musicEnabled": true
+     }'
+   ```
+
+## Authentication
+
+All SuperGlow endpoints require a Glowey **Developer API token**: `Authorization: Bearer glow_sk_...`
+
+Tokens are tied to a subscription account. Each request deducts credits from that account's balance.
+
+## Key Endpoints
+
+| Endpoint | Method | Purpose |
+|----------|--------|---------|
+| `/api/superglow/hermes` | POST | Submit prompt/conversation to orchestrator |
+| `/api/superglow/hermes/stream` | GET | Stream SSE results by jobId |
+| `/api/superglow/conversations` | GET, POST | List/create conversations |
+| `/api/superglow/conversations/[id]` | GET, PATCH, DELETE | Manage conversation record |
+| `/api/superglow/generate` | POST | Submit image generation (internal) |
+| `/api/superglow/video` | POST | Submit video generation (internal) |
+| `/api/superglow/music` | POST | Submit music generation (internal) |
+| `/api/superglow/lipsync` | POST | Submit lipsync generation (internal) |
+| `/api/superglow/tts` | POST | Submit text-to-speech (internal) |
+| `/api/superglow/files` | GET, POST, DELETE | Manage SuperGlow artifacts |
+| `/api/superglow/charge` | POST | Deduct credits for a run |
+| `/api/superglow/refund` | POST | Refund credits (cancellation/errors) |
+
+## Next Steps
+
+- [Hermes Orchestrator](./hermes) — Deep dive into the main chat endpoint and SSE streaming
+- [Conversations API](./conversations) — Manage session state
+- [Generation Endpoints](./generate) — Image, video, music, lipsync, TTS detail
+- [Files API](./files) — Upload/download artifacts
+- [Charge & Refund](./charge-refund) — Credit management
+- [Full Example](./full-example) — End-to-end walkthrough in Node.js and Python

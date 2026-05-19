@@ -1,0 +1,146 @@
+---
+title: Music Generation (SuperGlow)
+description: Internal music generation endpoint powered by Suno via KIE.
+---
+
+# Music Generation (SuperGlow)
+
+The SuperGlow music endpoint generates original background music and soundtracks via Suno's API (through KIE).
+
+## POST /api/superglow/music
+
+Submit a music generation request. Returns a `taskId` for polling via the standard `/api/music/status` endpoint.
+
+### Authentication
+
+Bearer token required.
+
+### Request Body
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `prompt` | string | Yes | Music description/lyrics (max 500 chars) |
+| `model` | string | No | Suno model version. Default: `V4_5` |
+
+### Supported Models
+
+- `V4` – Suno v4
+- `V4_5` – Suno v4.5 (default)
+- `V4_5PLUS` – Suno v4.5 Plus
+- `V4_5ALL` – Suno v4.5 All
+- `V5` – Suno v5
+- `V5_5` – Suno v5.5
+
+### Response
+
+```json
+{
+  "taskId": "task_music_xyz789"
+}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `taskId` | string | Unique task ID for polling status |
+
+### Errors
+
+- `400` – Missing `prompt` or invalid parameters
+- `401` – Unauthorized
+- `429` – Rate limited
+- `502` – Suno/KIE service unavailable
+
+### Example Request
+
+```bash
+curl -X POST https://glowey.app/api/superglow/music \
+  -H "Authorization: Bearer glow_sk_YOUR_TOKEN_HERE" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "prompt": "Upbeat electronic background music for a product demo, energetic but not overwhelming",
+    "model": "V5"
+  }'
+```
+
+### Example Response
+
+```json
+{
+  "taskId": "task_music_xyz789"
+}
+```
+
+---
+
+## Poll for Status
+
+Use the `taskId` with the music status endpoint:
+
+**GET** `/api/music/status?taskId=task_music_xyz789`
+
+Response while pending:
+```json
+{
+  "state": "pending",
+  "taskId": "task_music_xyz789"
+}
+```
+
+Response on success:
+```json
+{
+  "state": "success",
+  "taskId": "task_music_xyz789",
+  "output": {
+    "audio_url": "https://storage.glowey.app/music_xyz789.mp3"
+  }
+}
+```
+
+---
+
+## Credit Costs
+
+Music generation within SuperGlow does **not** deduct credits immediately. Credits are deducted once per entire SuperGlow run via the `/api/superglow/charge` endpoint.
+
+See [Charge & Refund](/docs/superglow/charge-refund) for details.
+
+---
+
+## Prompt Tips
+
+For best results, describe:
+
+- **Genre/Style**: "upbeat electronic", "cinematic orchestral", "lo-fi hip-hop"
+- **Mood**: "energetic", "calm", "dramatic", "playful"
+- **Instrumentation**: "acoustic guitar and strings", "synths and drums"
+- **Use case**: "product demo", "meditation", "action sequence"
+- **Tempo**: "fast-paced", "slow and contemplative"
+
+### Example Prompts
+
+**Product Demo (Energetic)**
+```
+"Upbeat electronic background music for a tech product demo. Modern, futuristic sound. 
+Energetic but professional. Around 120 BPM."
+```
+
+**Educational Video (Calm)**
+```
+"Soft, unobtrusive background music for an educational documentary. 
+Peaceful, contemplative. Acoustic instruments. Around 80 BPM."
+```
+
+**Trailer (Dramatic)**
+```
+"Cinematic orchestral trailer music. Dramatic, building intensity. 
+Strings, brass, and timpani. Epic and powerful."
+```
+
+---
+
+## Typical Time to Completion
+
+Music generation typically takes 30-120 seconds depending on the model and prompt complexity. Suno's v5 models are generally faster than v4 variants.
+
+Longer prompts or more detailed descriptions may take slightly longer.

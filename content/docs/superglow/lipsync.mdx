@@ -1,0 +1,155 @@
+---
+title: Lipsync Generation (SuperGlow)
+description: Internal lipsync generation endpoint used by the SuperGlow orchestrator.
+---
+
+# Lipsync Generation (SuperGlow)
+
+The SuperGlow lipsync endpoint applies audio-driven mouth movements to a video or image via fal.ai. It's used internally by Hermes when a generation requires synchronized speech or audio.
+
+## POST /api/superglow/lipsync
+
+Submit a lipsync request. Returns a `taskId` for polling via the standard `/api/lipsync/status` endpoint.
+
+### Authentication
+
+Bearer token required.
+
+### Request Body
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `sourceUrl` | string | Yes | URL of the source video or image to apply lipsync to |
+| `audioUrl` | string | Yes | URL of the audio file (WAV, MP3, or similar) |
+| `model` | string | No | Lipsync model ID. Default: `sync-lipsync` |
+
+### Supported Models
+
+- `sync-lipsync` – Base model (default)
+- `sync-lipsync-v2` – Improved version 2
+- `sync-lipsync-v3` – Latest version 3
+
+### Response
+
+```json
+{
+  "taskId": "task_ls9a8b7c",
+  "modelId": "sync-lipsync"
+}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `taskId` | string | Unique task ID for polling status |
+| `modelId` | string | Model ID used for the request |
+
+### Errors
+
+- `400` – Missing `sourceUrl` or `audioUrl`
+- `401` – Unauthorized
+- `429` – Rate limited
+- `502` – Lipsync service (fal.ai) unavailable
+
+### Example Request
+
+```bash
+curl -X POST https://glowey.app/api/superglow/lipsync \
+  -H "Authorization: Bearer glow_sk_YOUR_TOKEN_HERE" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "sourceUrl": "https://storage.glowey.app/avatar_video.mp4",
+    "audioUrl": "https://storage.glowey.app/narration.mp3",
+    "model": "sync-lipsync-v3"
+  }'
+```
+
+### Example Response
+
+```json
+{
+  "taskId": "task_ls9a8b7c",
+  "modelId": "sync-lipsync-v3"
+}
+```
+
+---
+
+## Poll for Status
+
+Use the `taskId` with the lipsync status endpoint:
+
+**GET** `/api/lipsync/status?taskId=task_ls9a8b7c`
+
+Response while pending:
+```json
+{
+  "state": "pending",
+  "taskId": "task_ls9a8b7c"
+}
+```
+
+Response on success:
+```json
+{
+  "state": "success",
+  "taskId": "task_ls9a8b7c",
+  "output": {
+    "video_url": "https://storage.glowey.app/lipsync_output.mp4"
+  }
+}
+```
+
+---
+
+## Credit Costs
+
+Lipsync generation within SuperGlow does **not** deduct credits immediately. Credits are deducted once per entire SuperGlow run via the `/api/superglow/charge` endpoint.
+
+See [Charge & Refund](/docs/superglow/charge-refund) for details.
+
+---
+
+## Use Cases
+
+### Avatar Narration
+
+Generate a realistic speaking avatar:
+
+```bash
+# 1. Generate an avatar image
+POST /api/superglow/generate
+  prompt: "A professional female presenter, warm smile, office background"
+  # Returns: task_img_001
+
+# 2. Generate TTS audio
+POST /api/superglow/tts
+  text: "Welcome to our product demo..."
+  voice: "alloy"
+  # Returns: task_tts_001
+
+# 3. Apply lipsync
+POST /api/superglow/lipsync
+  sourceUrl: <image_url_from_step_1>
+  audioUrl: <audio_url_from_step_2>
+  # Returns: task_ls_001
+```
+
+### Multiple Takes
+
+Generate multiple lipsync variations with different voice models:
+
+```bash
+POST /api/superglow/lipsync
+  sourceUrl: "https://storage.glowey.app/avatar.mp4"
+  audioUrl: "https://storage.glowey.app/narration_english.mp3"
+  model: "sync-lipsync-v3"
+
+POST /api/superglow/lipsync
+  sourceUrl: "https://storage.glowey.app/avatar.mp4"
+  audioUrl: "https://storage.glowey.app/narration_spanish.mp3"
+  model: "sync-lipsync-v3"
+```
+
+### Typical Time to Completion
+
+Lipsync typically completes in 10-30 seconds depending on video length and audio duration.

@@ -1,0 +1,298 @@
+---
+title: Charge & Refund
+description: Server-side credit management for SuperGlow generation runs.
+---
+
+# Charge & Refund
+
+The Charge and Refund endpoints manage credit deductions for SuperGlow pipeline runs. Individual generation stages (image, video, music) are **credit-free**; charges are applied once per run based on the total cost computed server-side.
+
+## POST /api/superglow/charge
+
+Deduct credits for a completed or in-progress SuperGlow run. This is called once per pipeline execution to charge for all stages.
+
+### Authentication
+
+Bearer token required.
+
+### Request Body
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `runId` | string | Yes | Unique run identifier (used as a refund key) |
+| `shotCount` | number | Yes | Number of shots/images generated in the run |
+| `videoModel` | string | No | Video model ID (if video was generated). Used for cost calculation. |
+| `videoEnabled` | boolean | No | Whether video generation was performed. Default: `true` if videoModel provided |
+| `musicEnabled` | boolean | No | Whether music generation was performed. Default: `false` |
+| `lipsyncEnabled` | boolean | No | Whether lipsync was performed. Default: `false` |
+| `ttsEnabled` | boolean | No | Whether text-to-speech was performed. Default: `false` |
+
+See `SuperGlowCostOpts` in the codebase for additional cost configuration options.
+
+### Response (Success)
+
+```json
+{
+  "success": true,
+  "newBalance": 850,
+  "chargedAmount": 150,
+  "cost": 150,
+  "breakdown": {
+    "imageGeneration": 75,
+    "videoGeneration": 60,
+    "music": 10,
+    "lipsync": 5,
+    "tts": 0
+  },
+  "runId": "run_abc123xyz"
+}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `success` | boolean | `true` on successful charge |
+| `newBalance` | number | User's credit balance after charge |
+| `chargedAmount` | number | Credits deducted |
+| `cost` | number | Total cost (same as chargedAmount) |
+| `breakdown` | object | Per-stage cost breakdown |
+| `runId` | string | Echo of the request runId |
+
+### Response (Insufficient Credits)
+
+```json
+{
+  "success": false,
+  "error": "insufficient_credits",
+  "required": 150,
+  "balance": 50,
+  "breakdown": { ... }
+}
+```
+
+Returns status 402 Payment Required.
+
+### Errors
+
+- `400` – Missing `runId` or `shotCount`, invalid JSON
+- `401` – Unauthorized
+- `402` – Insufficient credits
+- `429` – Rate limited
+- `500` – Server error
+
+### Example Request
+
+```bash
+curl -X POST https://glowey.app/api/superglow/charge \
+  -H "Authorization: Bearer glow_sk_YOUR_TOKEN_HERE" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "runId": "run_abc123xyz",
+    "shotCount": 3,
+    "videoModel": "seedance-2",
+    "videoEnabled": true,
+    "musicEnabled": true,
+    "lipsyncEnabled": false,
+    "ttsEnabled": true
+  }'
+```
+
+### Example Response
+
+```json
+{
+  "success": true,
+  "newBalance": 850,
+  "chargedAmount": 150,
+  "cost": 150,
+  "breakdown": {
+    "imageGeneration": 75,
+    "videoGeneration": 60,
+    "music": 10,
+    "lipsync": 0,
+    "tts": 5
+  },
+  "runId": "run_abc123xyz"
+}
+```
+
+---
+
+## POST /api/superglow/refund
+
+Refund credits for a SuperGlow run. Used when:
+- User cancels mid-pipeline (partial refund)
+- Pipeline crashes or errors (full refund)
+- Generation quality issue (adjustment)
+
+### Authentication
+
+Bearer token required.
+
+### Request Body
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `runId` | string | Yes | Run identifier to refund (must match a prior charge) |
+| `amount` | number | Yes | Credit amount to refund (positive number) |
+| `reason` | string | No | Reason for refund (for logging). E.g., "user_cancel", "error" |
+
+### Response
+
+```json
+{
+  "success": true,
+  "refundedAmount": 75,
+  "runId": "run_abc123xyz"
+}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `success` | boolean | `true` on successful refund |
+| `refundedAmount` | number | Credits refunded |
+| `runId` | string | Echo of the request runId |
+
+### Idempotency
+
+The endpoint is **idempotent** — calling twice with the same `runId` and `amount` will not double-refund. A second call returns:
+
+```json
+{
+  "success": false,
+  "error": "already_refunded"
+}
+```
+
+Returns status 409 Conflict.
+
+### Errors
+
+- `400` – Missing `runId` or `amount`, invalid JSON
+- `401` – Unauthorized
+- `409` – Already refunded (idempotency)
+- `429` – Rate limited
+- `500` – Server error
+
+### Example Request
+
+```bash
+curl -X POST https://glowey.app/api/superglow/refund \
+  -H "Authorization: Bearer glow_sk_YOUR_TOKEN_HERE" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "runId": "run_abc123xyz",
+    "amount": 75,
+    "reason": "user_cancel"
+  }'
+```
+
+### Example Response
+
+```json
+{
+  "success": true,
+  "refundedAmount": 75,
+  "runId": "run_abc123xyz"
+}
+```
+
+---
+
+## Charge & Refund Workflow
+
+### Typical Happy Path
+
+```
+1. User submits generation request
+   → SuperGlow pipeline begins (no credit deduction yet)
+
+2. All stages complete (image, video, music, etc.)
+   → POST /api/superglow/charge
+   → Credits deducted once
+
+3. Final assets returned to user
+   → Conversion complete
+```
+
+### Cancellation During Pipeline
+
+```
+1. POST /api/superglow/charge
+   → Credits deducted for stages submitted
+
+2. User cancels mid-way
+   → Calculate partial refund
+   → POST /api/superglow/refund
+   → Credits restored
+
+Example: Charged 150 credits, 2 of 3 stages complete
+         Refund 50 credits (remaining 1/3 not used)
+         User sees effective 100 credit charge
+```
+
+### Error Recovery
+
+```
+1. Pipeline submits generation requests
+   → POST /api/superglow/charge (full amount deducted)
+
+2. Generation fails (provider error)
+   → POST /api/superglow/refund (full amount or partial)
+   → Credits returned
+
+Note: Some errors may auto-refund; always check documentation
+      for specific error codes.
+```
+
+---
+
+## Cost Breakdown Example
+
+For a typical SuperGlow video run:
+
+```json
+{
+  "runId": "run_example_001",
+  "shotCount": 3,
+  "videoModel": "seedance-2",
+  "videoEnabled": true,
+  "musicEnabled": true,
+  "lipsyncEnabled": true,
+  "ttsEnabled": true
+}
+```
+
+Resulting charge:
+```json
+{
+  "breakdown": {
+    "imageGeneration": 45,    // 3 shots × 15 credits each
+    "videoGeneration": 57,    // Based on model + duration
+    "music": 10,              // Suno music generation
+    "lipsync": 5,             // fal.ai lipsync
+    "tts": 5                  // ElevenLabs TTS
+  },
+  "chargedAmount": 122
+}
+```
+
+---
+
+## Advanced: Pre-Flight Checks
+
+Before calling `/charge`, you can check if the user has sufficient credits:
+
+1. **Get current balance** — Query the [Credits & Pricing](/docs/credits-and-pricing) endpoint (if exposed) or use `/api/account` (token-dependent)
+2. **Estimate cost** — Calculate via `computeSuperGlowVideoCost()` in `lib/credits.ts`
+3. **Pre-check** — If `estimated > balance`, warn user before generation starts
+
+The `/charge` endpoint will reject (402) if insufficient credits remain, so pre-checking avoids mid-pipeline cancellations.
+
+---
+
+## Notes
+
+- **Charges are final** — Once deducted, credits count toward subscription usage
+- **Refunds reduce usage** — Refunded credits are logged as reversals in audit trails
+- **Run IDs must be unique** — Each generation run should have a distinct `runId` for tracking
+- **Cost calculation is server-side** — Never trust client-supplied cost estimates; the server recomputes before deducting

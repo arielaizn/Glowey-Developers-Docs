@@ -1,0 +1,538 @@
+---
+title: Full End-to-End Example
+description: Complete walkthrough building a SuperGlow video with Node.js and Python.
+---
+
+# Full End-to-End Example
+
+This guide walks through a complete SuperGlow pipeline: creating a conversation, submitting a prompt to Hermes, streaming results, charging for the run, and retrieving the final video.
+
+## Scenario
+
+A user requests: *"Create a 30-second explainer video about renewable energy with background music and a professional voiceover."*
+
+The pipeline will:
+1. Create a conversation record
+2. Send the prompt to Hermes orchestrator
+3. Stream Hermes events in real-time
+4. Charge for all stages at completion
+5. Download and store the final video
+
+## Node.js Implementation
+
+### 1. Create Conversation
+
+```javascript
+const BASE_URL = "https://glowey.app";
+const TOKEN = "glow_sk_YOUR_TOKEN_HERE";
+
+async function createConversation(title) {
+  const response = await fetch(`${BASE_URL}/api/superglow/conversations`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${TOKEN}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      title,
+      prompt: "Explainer video about renewable energy",
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to create conversation: ${response.status}`);
+  }
+
+  const conv = await response.json();
+  console.log("Created conversation:", conv.id);
+  return conv;
+}
+```
+
+### 2. Submit Prompt to Hermes
+
+```javascript
+async function submitToHermes(conversationId, prompt) {
+  const response = await fetch(`${BASE_URL}/api/superglow/hermes`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${TOKEN}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      conversation_id: conversationId,
+      message: prompt,
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Hermes request failed: ${response.status}`);
+  }
+
+  const job = await response.json();
+  console.log("Started Hermes job:", job.jobId);
+  return job;
+}
+```
+
+### 3. Stream Results
+
+```javascript
+async function streamHermes(jobId) {
+  const eventUrl = new URL(`${BASE_URL}/api/superglow/hermes/stream`);
+  eventUrl.searchParams.set("jobId", jobId);
+
+  // Note: EventSource doesn't allow custom headers in browsers.
+  // For Node.js, use fetch with keepalive or a dedicated SSE library.
+
+  return new Promise((resolve, reject) => {
+    const eventSource = new EventSource(eventUrl.toString(), {
+      headers: {
+        Authorization: `Bearer ${TOKEN}`,
+      },
+    });
+
+    const events = [];
+
+    eventSource.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      console.log(`[${data.type}]`, data.payload);
+      events.push(data);
+
+      if (data.type === "done") {
+        eventSource.close();
+        resolve({
+          events,
+          finalUrl: data.payload.finalVideoUrl,
+          conversationId: data.payload.conversationId,
+        });
+      }
+    };
+
+    eventSource.onerror = (error) => {
+      console.error("Stream error:", error);
+      eventSource.close();
+      reject(error);
+    };
+  });
+}
+```
+
+**Note for Node.js**: The browser's EventSource doesn't support custom `Authorization` headers. Use `node-fetch` with a manual fetch or a library like `eventsource`:
+
+```javascript
+import EventSource from "eventsource";
+
+async function streamHermesNode(jobId) {
+  const eventUrl = new URL(`${BASE_URL}/api/superglow/hermes/stream`);
+  eventUrl.searchParams.set("jobId", jobId);
+
+  return new Promise((resolve, reject) => {
+    const es = new EventSource(eventUrl.toString(), {
+      headers: {
+        Authorization: `Bearer ${TOKEN}`,
+      },
+    });
+
+    const events = [];
+
+    es.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      console.log(`[${data.type}]`, data.payload);
+      events.push(data);
+
+      if (data.type === "done") {
+        es.close();
+        resolve({
+          events,
+          finalUrl: data.payload.finalVideoUrl,
+          conversationId: data.payload.conversationId,
+        });
+      }
+    };
+
+    es.onerror = (error) => {
+      console.error("Stream error:", error);
+      es.close();
+      reject(error);
+    };
+  });
+}
+```
+
+### 4. Charge for the Run
+
+```javascript
+async function chargeRun(runId) {
+  const response = await fetch(`${BASE_URL}/api/superglow/charge`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${TOKEN}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      runId,
+      shotCount: 1,                // 1 video output
+      videoModel: "seedance-2",    // Video model used
+      videoEnabled: true,
+      musicEnabled: true,          // Background music
+      ttsEnabled: true,            // Voiceover
+      lipsyncEnabled: false,       // No lipsync in this example
+    }),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    if (response.status === 402) {
+      console.error("Insufficient credits:", error.required, "required,", error.balance, "available");
+      throw new Error("insufficient_credits");
+    }
+    throw new Error(`Charge failed: ${response.status}`);
+  }
+
+  const result = await response.json();
+  console.log("Charge successful!");
+  console.log("Breakdown:", result.breakdown);
+  console.log("New balance:", result.newBalance);
+  return result;
+}
+```
+
+### 5. Full Workflow
+
+```javascript
+async function generateExplainerVideo() {
+  // Step 1: Create conversation
+  const conv = await createConversation("Renewable Energy Explainer");
+  const conversationId = conv.id;
+  const runId = `run_${Date.now()}`;
+
+  // Step 2: Submit prompt to Hermes
+  const prompt = `Create a 30-second explainer video about renewable energy.
+    Include:
+    - A brief intro about renewable sources
+    - Visual examples of solar, wind, hydro
+    - Environmental benefits
+    - Add upbeat background music
+    - Include a professional male voiceover explaining each concept`;
+
+  const hermesJob = await submitToHermes(conversationId, prompt);
+
+  // Step 3: Stream and wait for completion
+  console.log("Streaming Hermes events...");
+  const result = await streamHermesNode(hermesJob.jobId);
+
+  console.log("Generation complete!");
+  console.log("Final video:", result.finalUrl);
+
+  // Step 4: Charge for the run
+  try {
+    const chargeResult = await chargeRun(runId);
+    console.log(`Charged ${chargeResult.chargedAmount} credits`);
+    console.log(`New balance: ${chargeResult.newBalance}`);
+  } catch (err) {
+    if (err.message === "insufficient_credits") {
+      // Refund if charge failed
+      await refundRun(runId, 150); // Partial refund as example
+      throw err;
+    }
+  }
+
+  // Step 5: Store final video reference
+  await fetch(`${BASE_URL}/api/superglow/conversations/${conversationId}`, {
+    method: "PATCH",
+    headers: {
+      Authorization: `Bearer ${TOKEN}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      final_video_url: result.finalUrl,
+    }),
+  });
+
+  console.log("Video generation complete and charged!");
+  return result;
+}
+
+async function refundRun(runId, amount) {
+  const response = await fetch(`${BASE_URL}/api/superglow/refund`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${TOKEN}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      runId,
+      amount,
+      reason: "insufficient_credits",
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Refund failed: ${response.status}`);
+  }
+
+  return await response.json();
+}
+
+// Run the workflow
+generateExplainerVideo().catch(console.error);
+```
+
+---
+
+## Python Implementation
+
+### 1. Setup
+
+```python
+import requests
+import time
+import uuid
+import json
+import sseclient
+
+BASE_URL = "https://glowey.app"
+TOKEN = "glow_sk_YOUR_TOKEN_HERE"
+
+class SuperGlowClient:
+    def __init__(self, token: str, base_url: str = BASE_URL):
+        self.token = token
+        self.base_url = base_url
+        self.session = requests.Session()
+        self.session.headers.update({
+            "Authorization": f"Bearer {token}",
+            "Content-Type": "application/json",
+        })
+
+    def _request(self, method: str, path: str, **kwargs) -> dict:
+        url = f"{self.base_url}{path}"
+        response = self.session.request(method, url, **kwargs)
+        response.raise_for_status()
+        return response.json()
+```
+
+### 2. Create Conversation
+
+```python
+    def create_conversation(self, title: str) -> dict:
+        """Create a new SuperGlow conversation."""
+        return self._request("POST", "/api/superglow/conversations", json={
+            "title": title,
+            "prompt": "Explainer video about renewable energy",
+        })
+```
+
+### 3. Submit to Hermes
+
+```python
+    def submit_to_hermes(self, conversation_id: str, message: str) -> dict:
+        """Submit a prompt to Hermes orchestrator."""
+        return self._request("POST", "/api/superglow/hermes", json={
+            "conversation_id": conversation_id,
+            "message": message,
+        })
+```
+
+### 4. Stream Results
+
+```python
+    def stream_hermes(self, job_id: str) -> tuple[list, str, str]:
+        """Stream Hermes events via SSE."""
+        url = f"{self.base_url}/api/superglow/hermes/stream"
+        params = {"jobId": job_id}
+
+        # Use sseclient library: pip install sseclient-py
+        response = self.session.get(url, params=params, stream=True)
+        response.raise_for_status()
+
+        client = sseclient.SSEClient(response)
+        events = []
+        final_url = None
+        conversation_id = None
+
+        for event in client:
+            if event.event:  # Skip empty events
+                data = json.loads(event.data)
+                print(f"[{data.get('type')}] {data.get('payload')}")
+                events.append(data)
+
+                if data.get("type") == "done":
+                    final_url = data.get("payload", {}).get("finalVideoUrl")
+                    conversation_id = data.get("payload", {}).get("conversationId")
+                    break
+                elif data.get("type") == "error":
+                    raise RuntimeError(f"Stream error: {data.get('payload')}")
+
+        return events, final_url, conversation_id
+```
+
+### 5. Charge the Run
+
+```python
+    def charge_run(self, run_id: str, shot_count: int = 1) -> dict:
+        """Deduct credits for the SuperGlow run."""
+        response = self._request("POST", "/api/superglow/charge", json={
+            "runId": run_id,
+            "shotCount": shot_count,
+            "videoModel": "seedance-2",
+            "videoEnabled": True,
+            "musicEnabled": True,
+            "ttsEnabled": True,
+            "lipsyncEnabled": False,
+        })
+
+        if "success" in response and not response["success"]:
+            if response.get("error") == "insufficient_credits":
+                raise ValueError(
+                    f"Insufficient credits. Required: {response.get('required')}, "
+                    f"Available: {response.get('balance')}"
+                )
+            raise RuntimeError(f"Charge failed: {response.get('error')}")
+
+        return response
+```
+
+### 6. Refund
+
+```python
+    def refund_run(self, run_id: str, amount: int) -> dict:
+        """Refund credits for a run."""
+        return self._request("POST", "/api/superglow/refund", json={
+            "runId": run_id,
+            "amount": amount,
+            "reason": "error",
+        })
+```
+
+### 7. Full Workflow
+
+```python
+    def generate_explainer_video(self) -> dict:
+        """Complete SuperGlow video generation workflow."""
+        # Step 1: Create conversation
+        conv = self.create_conversation("Renewable Energy Explainer")
+        conversation_id = conv["id"]
+        run_id = f"run_{int(time.time() * 1000)}"
+
+        print(f"Created conversation: {conversation_id}")
+
+        # Step 2: Submit prompt
+        prompt = """Create a 30-second explainer video about renewable energy.
+        Include:
+        - A brief intro about renewable sources
+        - Visual examples of solar, wind, hydro
+        - Environmental benefits
+        - Add upbeat background music
+        - Include a professional male voiceover explaining each concept"""
+
+        hermes_job = self.submit_to_hermes(conversation_id, prompt)
+        job_id = hermes_job["jobId"]
+
+        print(f"Started Hermes job: {job_id}")
+
+        # Step 3: Stream and wait for completion
+        print("Streaming Hermes events...")
+        events, final_url, _ = self.stream_hermes(job_id)
+
+        print(f"Generation complete! Video: {final_url}")
+
+        # Step 4: Charge for the run
+        try:
+            charge_result = self.charge_run(run_id)
+            print(f"Charged {charge_result['chargedAmount']} credits")
+            print(f"New balance: {charge_result['newBalance']}")
+            print(f"Cost breakdown: {charge_result['breakdown']}")
+        except ValueError as err:
+            print(f"Charge failed: {err}")
+            # Optionally refund
+            self.refund_run(run_id, 150)
+            raise
+
+        # Step 5: Store final video in conversation
+        self._request("PATCH",
+            f"/api/superglow/conversations/{conversation_id}",
+            json={"final_video_url": final_url}
+        )
+
+        return {
+            "conversation_id": conversation_id,
+            "final_url": final_url,
+            "run_id": run_id,
+        }
+
+
+# Usage
+if __name__ == "__main__":
+    client = SuperGlowClient(TOKEN)
+    result = client.generate_explainer_video()
+    print(f"Success! Video stored at: {result['final_url']}")
+```
+
+---
+
+## Error Handling Best Practices
+
+### Network Timeouts
+
+```javascript
+// Node.js
+const timeoutPromise = new Promise((_, reject) =>
+  setTimeout(() => reject(new Error("Timeout")), 60000)
+);
+
+const result = await Promise.race([
+  streamHermesNode(jobId),
+  timeoutPromise,
+]);
+```
+
+### Insufficient Credits
+
+```python
+try:
+    charge_result = client.charge_run(run_id)
+except ValueError as err:
+    if "Insufficient credits" in str(err):
+        # Refund any partial work
+        client.refund_run(run_id, estimated_cost // 2)
+        # Notify user to top up
+        print("Please add credits to your account")
+```
+
+### Retry Logic
+
+```javascript
+async function chargeWithRetry(runId, maxRetries = 3) {
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      return await chargeRun(runId);
+    } catch (err) {
+      if (err.message === "insufficient_credits" || i === maxRetries - 1) {
+        throw err; // Don't retry on known failures
+      }
+      console.log(`Retry ${i + 1}/${maxRetries}...`);
+      await new Promise(r => setTimeout(r, 1000 * (i + 1)));
+    }
+  }
+}
+```
+
+---
+
+## Summary
+
+This example demonstrates:
+
+1. **Conversation management** — Create and track a generation session
+2. **Real-time streaming** — Listen for Hermes events via SSE
+3. **Credit deduction** — Charge after successful completion
+4. **Error recovery** — Refund on insufficient credits or errors
+5. **Asset storage** — Link final output to conversation record
+
+For production, consider:
+- Add persistent logging for debugging
+- Implement webhook/polling fallback if SSE is unreliable
+- Cache token expiration and refresh logic
+- Set appropriate timeout windows for long-running videos
+- Monitor credit usage and warn users near-limits

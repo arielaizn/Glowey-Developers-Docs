@@ -1,0 +1,16 @@
+{
+  "title": "SuperGlow",
+  "pages": [
+    "index",
+    "hermes",
+    "conversations",
+    "generate",
+    "video",
+    "lipsync",
+    "music",
+    "tts",
+    "files",
+    "charge-refund",
+    "full-example"
+  ]
+}

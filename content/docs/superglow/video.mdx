@@ -1,0 +1,150 @@
+---
+title: Video Generation (SuperGlow)
+description: Internal video generation endpoint used by the SuperGlow orchestrator.
+---
+
+# Video Generation (SuperGlow)
+
+The SuperGlow video generation endpoint is used internally by Hermes to generate video clips during multi-stage pipelines.
+
+## POST /api/superglow/video
+
+Submit a video generation request. Returns a `taskId` for polling via the standard `/api/video/status` endpoint.
+
+### Authentication
+
+Bearer token required.
+
+### Request Body
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `prompt` | string | Yes | Video description (max 2000 chars) |
+| `aspectRatio` | string | No | Aspect ratio: `1:1`, `16:9`, `9:16`. Default: `16:9` |
+| `duration` | number \| string | No | Video length in seconds (4-15 depending on model). Default: `5` |
+| `modelId` | string | No | Video model ID. Default: `seedance-2` |
+| `refImageUrl` | string | No | Single reference image for image-to-video generation |
+
+### Response
+
+```json
+{
+  "taskId": "task_video123xyz",
+  "strategy": "market"
+}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `taskId` | string | Unique task ID for polling status |
+| `strategy` | string | Strategy used (always `market` for SuperGlow) |
+
+### Default Model
+
+If no `modelId` is specified, SuperGlow uses `seedance-2`, which provides a good balance of quality and speed.
+
+Other supported models:
+- `seedance-2-fast` – Faster generation
+- `seedance-2` – Higher quality (default)
+- `kling-3` – Excellent motion quality
+- `veo-3` – Cinematic quality
+
+### Errors
+
+- `400` – Missing `prompt` or invalid parameters
+- `401` – Unauthorized
+- `429` – Rate limited
+- `502` – Video generation service unavailable
+
+### Example Request
+
+```bash
+curl -X POST https://glowey.app/api/superglow/video \
+  -H "Authorization: Bearer glow_sk_YOUR_TOKEN_HERE" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "prompt": "A robot dancing in a cyberpunk neon city",
+    "modelId": "seedance-2",
+    "duration": 5,
+    "aspectRatio": "16:9"
+  }'
+```
+
+### Example Response
+
+```json
+{
+  "taskId": "task_v4i5j6k7",
+  "strategy": "market"
+}
+```
+
+---
+
+## Poll for Status
+
+Use the `taskId` with the standard video status endpoint:
+
+**GET** `/api/video/status?taskId=task_v4i5j6k7`
+
+See [Video Generation Status](/docs/endpoints/video#check-video-status) for polling details and response shapes.
+
+### Example Status Check
+
+```bash
+curl "https://glowey.app/api/video/status?taskId=task_v4i5j6k7" \
+  -H "Authorization: Bearer glow_sk_YOUR_TOKEN_HERE"
+```
+
+Response while pending:
+```json
+{
+  "state": "pending",
+  "taskId": "task_v4i5j6k7"
+}
+```
+
+Response on success:
+```json
+{
+  "state": "success",
+  "taskId": "task_v4i5j6k7",
+  "output": {
+    "video_url": "https://storage.glowey.app/video_xyz.mp4",
+    "cover_image_url": "https://storage.glowey.app/cover_xyz.jpg"
+  }
+}
+```
+
+---
+
+## Credit Costs
+
+Video generation within SuperGlow does **not** deduct credits immediately. Credits are deducted once per entire SuperGlow run via the `/api/superglow/charge` endpoint.
+
+See [Charge & Refund](/docs/superglow/charge-refund) for details.
+
+---
+
+## Image-to-Video
+
+Use a reference image to guide video generation:
+
+```bash
+curl -X POST https://glowey.app/api/superglow/video \
+  -H "Authorization: Bearer glow_sk_YOUR_TOKEN_HERE" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "prompt": "The scene animates with swirling energy",
+    "refImageUrl": "https://storage.glowey.app/reference_image.jpg",
+    "modelId": "kling-3",
+    "duration": 8
+  }'
+```
+
+### Typical Time to Completion
+
+- Seedance 2.0 Fast: 15-30 seconds
+- Seedance 2.0: 30-60 seconds
+- Kling 3.0: 20-40 seconds
+- Veo 3.1: 30-90 seconds

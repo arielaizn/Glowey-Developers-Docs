@@ -1,0 +1,187 @@
+---
+title: Text-to-Speech Generation (SuperGlow)
+description: Internal TTS generation endpoint powered by ElevenLabs via KIE.
+---
+
+# Text-to-Speech Generation (SuperGlow)
+
+The SuperGlow TTS endpoint generates human-quality speech from text using ElevenLabs' advanced voice synthesis (via KIE).
+
+## POST /api/superglow/tts
+
+Submit a text-to-speech request. Returns a `taskId` for polling via the standard `/api/tts/status` endpoint.
+
+### Authentication
+
+Bearer token required.
+
+### Request Body
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `text` | string | Yes | Text to synthesize (max 800 chars) |
+| `voice` | string | No | Voice identifier. Default: `rachel` |
+
+### Supported Voices
+
+ElevenLabs offers a range of professional voices. Common options:
+
+- `rachel` – Warm, friendly female voice (default)
+- `clint` – Deep, authoritative male voice
+- `domi` – Upbeat female voice
+- `bella` – Calm, soothing female voice
+- `josh` – Energetic male voice
+- `sam` – Professional male voice
+- `glinda` – Bright, positive female voice
+- And many more multilingual options
+
+Contact support for a complete voice list or custom voice cloning.
+
+### Response
+
+```json
+{
+  "taskId": "task_tts_abc123"
+}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `taskId` | string | Unique task ID for polling status |
+
+### Errors
+
+- `400` – Missing `text` or invalid parameters
+- `401` – Unauthorized
+- `429` – Rate limited
+- `502` – ElevenLabs/KIE service unavailable
+
+### Example Request
+
+```bash
+curl -X POST https://glowey.app/api/superglow/tts \
+  -H "Authorization: Bearer glow_sk_YOUR_TOKEN_HERE" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "text": "Welcome to our quantum computing platform. Today we explore the power of superposition.",
+    "voice": "clint"
+  }'
+```
+
+### Example Response
+
+```json
+{
+  "taskId": "task_tts_abc123"
+}
+```
+
+---
+
+## Poll for Status
+
+Use the `taskId` with the TTS status endpoint:
+
+**GET** `/api/tts/status?taskId=task_tts_abc123`
+
+Response while pending:
+```json
+{
+  "state": "pending",
+  "taskId": "task_tts_abc123"
+}
+```
+
+Response on success:
+```json
+{
+  "state": "success",
+  "taskId": "task_tts_abc123",
+  "output": {
+    "audio_url": "https://storage.glowey.app/tts_abc123.mp3"
+  }
+}
+```
+
+---
+
+## Credit Costs
+
+TTS generation within SuperGlow does **not** deduct credits immediately. Credits are deducted once per entire SuperGlow run via the `/api/superglow/charge` endpoint.
+
+See [Charge & Refund](/docs/superglow/charge-refund) for details.
+
+---
+
+## Voice Selection
+
+Choose a voice that matches your content:
+
+| Voice | Tone | Use Case |
+|-------|------|----------|
+| `rachel` | Warm, friendly | Tutorials, product demos, educational |
+| `clint` | Deep, authoritative | Documentaries, formal presentations |
+| `bella` | Calm, soothing | Meditations, wellness, relaxation |
+| `josh` | Energetic, upbeat | Marketing, promotional videos |
+| `domi` | Bright, positive | Children's content, upbeat tutorials |
+
+---
+
+## Typical Time to Completion
+
+TTS generation typically completes in 5-15 seconds depending on text length. Longer texts may take slightly longer, but usually complete within 30 seconds.
+
+---
+
+## Voice Quality Settings
+
+The SuperGlow TTS endpoint uses ElevenLabs' Text-to-Dialogue model with the following defaults:
+
+- **Stability**: 0.5 (moderate stability for natural variation)
+- **Model**: `elevenlabs/text-to-dialogue-v3`
+
+For custom stability or advanced voice settings, contact Glowey support.
+
+---
+
+## Use Cases
+
+### Video Narration
+
+Generate professional narration for your videos:
+
+```bash
+curl -X POST https://glowey.app/api/superglow/tts \
+  -H "Authorization: Bearer glow_sk_YOUR_TOKEN_HERE" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "text": "Section two: Advanced quantum applications. In this section, we explore how quantum computers solve real-world problems.",
+    "voice": "clint"
+  }'
+```
+
+### Multi-Voice Dialogue
+
+Generate different voices for different speakers:
+
+```bash
+# Speaker 1 (Narrator)
+POST /api/superglow/tts
+  text: "What is quantum computing?"
+  voice: "rachel"
+
+# Speaker 2 (Expert)
+POST /api/superglow/tts
+  text: "It's a computation paradigm that leverages quantum mechanics."
+  voice: "josh"
+```
+
+### Accessibility
+
+Create audio descriptions or subtitles:
+
+```bash
+POST /api/superglow/tts
+  text: "Image: A serene mountain landscape at sunset with golden light reflecting off a lake."
+  voice: "bella"
+```

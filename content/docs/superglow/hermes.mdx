@@ -1,0 +1,227 @@
+---
+title: Hermes Orchestrator
+description: LLM-powered chat endpoint that orchestrates multi-stage media generation.
+---
+
+# Hermes Orchestrator
+
+Hermes is SuperGlow's intelligent orchestrator. It receives a prompt or conversation history, uses an LLM to decide which generators to invoke, submits jobs in parallel or chains, and streams results back as SSE events.
+
+## POST /api/superglow/hermes
+
+Submit a prompt or conversation to the Hermes orchestrator. Returns a `jobId` for streaming results.
+
+### Authentication
+
+Bearer token required.
+
+### Request Body
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `conversation_id` | string | No | UUID or slug of an existing conversation. If omitted, a new session is created server-side. |
+| `message` | string | Yes | User prompt or conversation message (max 5000 chars) |
+| `system_prompt` | string | No | Custom system instructions for Hermes. If omitted, a default prompt is used. |
+| `model` | string | No | Hermes LLM to use. Default: `gpt-4o-mini` |
+
+### Response
+
+```json
+{
+  "jobId": "job_abc123xyz",
+  "conversation_id": "conv_def456uvw",
+  "status": "started"
+}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `jobId` | string | Unique job identifier for streaming results via `/hermes/stream` |
+| `conversation_id` | string | UUID or slug of the conversation (reusable for follow-up messages) |
+| `status` | string | Job status: `started` |
+
+### Errors
+
+- `400` – Missing `message` or invalid payload
+- `401` – Unauthorized (invalid or missing token)
+- `429` – Rate limited
+- `502` – Hermes service unavailable
+
+### Example Request
+
+```bash
+curl -X POST https://glowey.app/api/superglow/hermes \
+  -H "Authorization: Bearer glow_sk_YOUR_TOKEN_HERE" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "message": "Create an animated explainer video about quantum computing",
+    "system_prompt": "You are a creative director. Always prioritize visual clarity."
+  }'
+```
+
+### Example Response
+
+```json
+{
+  "jobId": "job_f8e7d6c5b4a3",
+  "conversation_id": "conv_19a8b7c6d5e4f",
+  "status": "started"
+}
+```
+
+---
+
+## GET /api/superglow/hermes/stream
+
+Stream SSE events from an in-progress Hermes orchestration job.
+
+### Authentication
+
+Bearer token required.
+
+### Query Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `jobId` | string | Yes | Job ID from the `/hermes` POST response |
+
+### Response Format
+
+Server-Sent Events (SSE) with the following event types:
+
+#### `text` — Text delta
+
+```json
+{
+  "type": "text",
+  "payload": "Creating a dynamic 3D visualization of quantum superposition..."
+}
+```
+
+#### `tool_call` — Generation tool invocation
+
+```json
+{
+  "type": "tool_call",
+  "payload": {
+    "toolName": "generate_image",
+    "params": {
+      "prompt": "quantum superposition 3D visualization",
+      "taskId": "task_xyz789"
+    }
+  }
+}
+```
+
+#### `tool_result` — Tool completion
+
+```json
+{
+  "type": "tool_result",
+  "payload": {
+    "toolName": "generate_image",
+    "result": {
+      "image_url": "https://storage.glowey.app/img_abc123.jpg",
+      "taskId": "task_xyz789"
+    }
+  }
+}
+```
+
+#### `done` — Stream finished
+
+```json
+{
+  "type": "done",
+  "payload": {
+    "reason": "stop",
+    "finalVideoUrl": "https://storage.glowey.app/video_final.mp4",
+    "conversationId": "conv_19a8b7c6d5e4f"
+  }
+}
+```
+
+#### `error` — Stream error
+
+```json
+{
+  "type": "error",
+  "payload": "Hermes stream failed: internal server error"
+}
+```
+
+### Errors
+
+- `400` – Missing `jobId`
+- `401` – Unauthorized
+- `429` – Rate limited
+- `500` – Server error
+
+### Example Request
+
+```bash
+curl "https://glowey.app/api/superglow/hermes/stream?jobId=job_f8e7d6c5b4a3" \
+  -H "Authorization: Bearer glow_sk_YOUR_TOKEN_HERE" \
+  -N  # unbuffered output
+```
+
+### Example Stream Output
+
+```
+data: {"type":"text","payload":"I'll create a quantum computing explainer video..."}
+
+data: {"type":"tool_call","payload":{"toolName":"generate_image","params":{"prompt":"quantum superposition visualization","taskId":"task_8a9b0c1d"}}}
+
+data: {"type":"tool_result","payload":{"toolName":"generate_image","result":{"image_url":"https://storage.glowey.app/quantum_viz_001.jpg","taskId":"task_8a9b0c1d"}}}
+
+data: {"type":"text","payload":"Now creating the video animation..."}
+
+data: {"type":"tool_call","payload":{"toolName":"generate_video","params":{"prompt":"animated quantum tunneling effect","refImageUrl":"https://storage.glowey.app/quantum_viz_001.jpg","taskId":"task_2c3d4e5f"}}}
+
+data: {"type":"tool_result","payload":{"toolName":"generate_video","result":{"video_url":"https://storage.glowey.app/quantum_video.mp4","taskId":"task_2c3d4e5f"}}}
+
+data: {"type":"done","payload":{"reason":"stop","finalVideoUrl":"https://storage.glowey.app/quantum_video.mp4","conversationId":"conv_19a8b7c6d5e4f"}}
+```
+
+### Client-Side Streaming
+
+JavaScript example using EventSource:
+
+```javascript
+const jobId = "job_f8e7d6c5b4a3";
+const eventSource = new EventSource(
+  `https://glowey.app/api/superglow/hermes/stream?jobId=${jobId}`,
+  { headers: { Authorization: "Bearer glow_sk_YOUR_TOKEN_HERE" } }
+);
+
+eventSource.onmessage = (event) => {
+  const data = JSON.parse(event.data);
+  console.log(`[${data.type}]`, data.payload);
+
+  if (data.type === "done") {
+    console.log("Generation complete:", data.payload.finalVideoUrl);
+    eventSource.close();
+  }
+};
+
+eventSource.onerror = (error) => {
+  console.error("Stream error:", error);
+  eventSource.close();
+};
+```
+
+## Conversation Continuity
+
+Use the `conversation_id` from the initial POST response to continue a conversation:
+
+```bash
+curl -X POST https://glowey.app/api/superglow/hermes \
+  -H "Authorization: Bearer glow_sk_YOUR_TOKEN_HERE" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "conversation_id": "conv_19a8b7c6d5e4f",
+    "message": "Now make it 4K resolution and add background music"
+  }'
+```
+
+Hermes will retain context from previous messages within the conversation and refine the generation accordingly.

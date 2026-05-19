@@ -1,7 +1,9 @@
 import Link from 'next/link';
 import { GloweyLogo } from '@/components/GloweyLogo';
 
-const ORANGE = '#FF6B35';
+const BRAND = '#00D4FF';
+const BRAND_DARK = '#0099BB';
+const BRAND_GRADIENT = `linear-gradient(135deg, ${BRAND} 0%, ${BRAND_DARK} 100%)`;
 
 const quickLinks = [
   {
@@ -70,14 +72,15 @@ export default function HomePage() {
           <Link
             href="/docs"
             style={{
-              padding: '0.375rem 1rem',
-              borderRadius: '0.375rem',
+              padding: '0.5rem 1.1rem',
+              borderRadius: '9999px',
               fontSize: '0.875rem',
-              fontWeight: 500,
-              color: '#fff',
-              backgroundColor: ORANGE,
+              fontWeight: 700,
+              color: '#020304',
+              background: BRAND_GRADIENT,
               textDecoration: 'none',
-              transition: 'opacity 0.15s',
+              transition: 'filter 0.15s, box-shadow 0.15s',
+              boxShadow: '0 0 20px rgba(0, 212, 255, 0.35), inset 0 1px 0 rgba(255,255,255,0.22)',
             }}
           >
             Get Started
@@ -91,7 +94,8 @@ export default function HomePage() {
           position: 'relative',
           padding: '6rem 1.5rem',
           textAlign: 'center',
-          background: 'radial-gradient(ellipse at 50% 0%, rgba(255, 107, 53, 0.15) 0%, transparent 70%)',
+          background:
+            'radial-gradient(ellipse at 50% 0%, rgba(0, 212, 255, 0.18) 0%, transparent 70%), radial-gradient(ellipse at 80% 30%, rgba(167, 139, 250, 0.10) 0%, transparent 60%)',
         }}
       >
         <div style={{ margin: '0 auto', maxWidth: '48rem' }}>
@@ -113,7 +117,7 @@ export default function HomePage() {
           </div>
           <h1 style={{ fontSize: '3rem', fontWeight: 700, letterSpacing: '-0.025em', marginBottom: '1rem', lineHeight: 1.1 }}>
             Glowey{' '}
-            <span style={{ color: ORANGE }}>Developer API</span>
+            <span style={{ color: BRAND }}>Developer API</span>
           </h1>
           <p style={{ fontSize: '1.25rem', color: 'var(--color-fd-muted-foreground)', marginBottom: '2.5rem', maxWidth: '36rem', margin: '0 auto 2.5rem' }}>
             Your comprehensive guide to the all-in-one AI creative platform&apos;s API.
@@ -123,13 +127,14 @@ export default function HomePage() {
             <Link
               href="/docs"
               style={{
-                padding: '0.75rem 1.5rem',
-                borderRadius: '0.5rem',
-                fontWeight: 600,
-                color: '#fff',
-                backgroundColor: ORANGE,
+                padding: '0.875rem 1.75rem',
+                borderRadius: '9999px',
+                fontWeight: 700,
+                color: '#020304',
+                background: BRAND_GRADIENT,
                 textDecoration: 'none',
-                transition: 'opacity 0.15s',
+                transition: 'filter 0.15s, box-shadow 0.15s',
+                boxShadow: '0 0 28px rgba(0, 212, 255, 0.4), inset 0 1px 0 rgba(255,255,255,0.22)',
               }}
             >
               Read the docs
@@ -188,7 +193,7 @@ export default function HomePage() {
                 viewBox="0 0 16 16"
                 fill="none"
               >
-                <path d="M3 8h10M9 4l4 4-4 4" stroke={ORANGE} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M3 8h10M9 4l4 4-4 4" stroke={BRAND} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </Link>
           ))}
@@ -211,9 +216,9 @@ export default function HomePage() {
         <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
           {capabilities.map((item) => (
             <li key={item} style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem', fontSize: '0.875rem' }}>
-              <span style={{ marginTop: '0.125rem', flexShrink: 0, color: ORANGE }}>
+              <span style={{ marginTop: '0.125rem', flexShrink: 0, color: BRAND }}>
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                  <path d="M3 8l4 4 6-7" stroke={ORANGE} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                  <path d="M3 8l4 4 6-7" stroke={BRAND} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </span>
               <span>{item}</span>
