@@ -63,7 +63,7 @@ Fixed per operation. See [Credits & Pricing](/docs/credits-and-pricing#image-edi
 #### Enhance
 
 ```bash
-curl -X POST https://glowey.app/api/edit \
+curl -X POST https://gloweyai.com/api/edit \
   -H "Authorization: Bearer glow_sk_YOUR_TOKEN_HERE" \
   -H "Content-Type: application/json" \
   -d '{
@@ -75,7 +75,7 @@ curl -X POST https://glowey.app/api/edit \
 #### Remove Background
 
 ```bash
-curl -X POST https://glowey.app/api/edit \
+curl -X POST https://gloweyai.com/api/edit \
   -H "Authorization: Bearer glow_sk_YOUR_TOKEN_HERE" \
   -H "Content-Type: application/json" \
   -d '{
@@ -87,7 +87,7 @@ curl -X POST https://glowey.app/api/edit \
 #### Inpaint (Edit with Mask)
 
 ```bash
-curl -X POST https://glowey.app/api/edit \
+curl -X POST https://gloweyai.com/api/edit \
   -H "Authorization: Bearer glow_sk_YOUR_TOKEN_HERE" \
   -H "Content-Type: application/json" \
   -d '{
@@ -101,7 +101,7 @@ curl -X POST https://glowey.app/api/edit \
 #### Expand
 
 ```bash
-curl -X POST https://glowey.app/api/edit \
+curl -X POST https://gloweyai.com/api/edit \
   -H "Authorization: Bearer glow_sk_YOUR_TOKEN_HERE" \
   -H "Content-Type: application/json" \
   -d '{
@@ -153,7 +153,7 @@ Bearer token required.
   "state": "success",
   "taskId": "task_edit_xyz789",
   "output": {
-    "imageUrl": "https://storage.glowey.app/edited_xyz789.jpg"
+    "imageUrl": "https://storage.gloweyai.com/edited_xyz789.jpg"
   }
 }
 ```
@@ -180,7 +180,7 @@ If failed, any remaining credits are refunded.
 ### Example Request
 
 ```bash
-curl "https://glowey.app/api/edit/status?taskId=task_edit_xyz789" \
+curl "https://gloweyai.com/api/edit/status?taskId=task_edit_xyz789" \
   -H "Authorization: Bearer glow_sk_YOUR_TOKEN_HERE"
 ```
 

@@ -59,7 +59,7 @@ Other supported models:
 ### Example Request
 
 ```bash
-curl -X POST https://glowey.app/api/superglow/video \
+curl -X POST https://gloweyai.com/api/superglow/video \
   -H "Authorization: Bearer glow_sk_YOUR_TOKEN_HERE" \
   -H "Content-Type: application/json" \
   -d '{
@@ -92,7 +92,7 @@ See [Video Generation Status](/docs/endpoints/video#check-video-status) for poll
 ### Example Status Check
 
 ```bash
-curl "https://glowey.app/api/video/status?taskId=task_v4i5j6k7" \
+curl "https://gloweyai.com/api/video/status?taskId=task_v4i5j6k7" \
   -H "Authorization: Bearer glow_sk_YOUR_TOKEN_HERE"
 ```
 
@@ -110,8 +110,8 @@ Response on success:
   "state": "success",
   "taskId": "task_v4i5j6k7",
   "output": {
-    "video_url": "https://storage.glowey.app/video_xyz.mp4",
-    "cover_image_url": "https://storage.glowey.app/cover_xyz.jpg"
+    "video_url": "https://storage.gloweyai.com/video_xyz.mp4",
+    "cover_image_url": "https://storage.gloweyai.com/cover_xyz.jpg"
   }
 }
 ```
@@ -131,12 +131,12 @@ See [Charge & Refund](/docs/superglow/charge-refund) for details.
 Use a reference image to guide video generation:
 
 ```bash
-curl -X POST https://glowey.app/api/superglow/video \
+curl -X POST https://gloweyai.com/api/superglow/video \
   -H "Authorization: Bearer glow_sk_YOUR_TOKEN_HERE" \
   -H "Content-Type: application/json" \
   -d '{
     "prompt": "The scene animates with swirling energy",
-    "refImageUrl": "https://storage.glowey.app/reference_image.jpg",
+    "refImageUrl": "https://storage.gloweyai.com/reference_image.jpg",
     "modelId": "kling-3",
     "duration": 8
   }'

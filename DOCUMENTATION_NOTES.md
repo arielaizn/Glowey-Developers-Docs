@@ -35,7 +35,7 @@
 
 ## Assumptions Made
 
-1. **Base URL:** `https://glowey.app/api` for all endpoints
+1. **Base URL:** `https://gloweyai.com/api` for all endpoints
 2. **Token Format:** `glow_sk_<32 random characters>` (extracted from code)
 3. **Rate Limit:** 60 req/min/token (from `api-rate-limit.ts`)
 4. **Credit Costs:** Extracted from `lib/credits.ts` and `lib/generation-pricing.ts` – tables are accurate and comprehensive

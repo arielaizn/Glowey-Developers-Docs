@@ -53,12 +53,12 @@ Bearer token required.
 ### Example Request
 
 ```bash
-curl -X POST https://glowey.app/api/superglow/lipsync \
+curl -X POST https://gloweyai.com/api/superglow/lipsync \
   -H "Authorization: Bearer glow_sk_YOUR_TOKEN_HERE" \
   -H "Content-Type: application/json" \
   -d '{
-    "sourceUrl": "https://storage.glowey.app/avatar_video.mp4",
-    "audioUrl": "https://storage.glowey.app/narration.mp3",
+    "sourceUrl": "https://storage.gloweyai.com/avatar_video.mp4",
+    "audioUrl": "https://storage.gloweyai.com/narration.mp3",
     "model": "sync-lipsync-v3"
   }'
 ```
@@ -94,7 +94,7 @@ Response on success:
   "state": "success",
   "taskId": "task_ls9a8b7c",
   "output": {
-    "video_url": "https://storage.glowey.app/lipsync_output.mp4"
+    "video_url": "https://storage.gloweyai.com/lipsync_output.mp4"
   }
 }
 ```
@@ -140,13 +140,13 @@ Generate multiple lipsync variations with different voice models:
 
 ```bash
 POST /api/superglow/lipsync
-  sourceUrl: "https://storage.glowey.app/avatar.mp4"
-  audioUrl: "https://storage.glowey.app/narration_english.mp3"
+  sourceUrl: "https://storage.gloweyai.com/avatar.mp4"
+  audioUrl: "https://storage.gloweyai.com/narration_english.mp3"
   model: "sync-lipsync-v3"
 
 POST /api/superglow/lipsync
-  sourceUrl: "https://storage.glowey.app/avatar.mp4"
-  audioUrl: "https://storage.glowey.app/narration_spanish.mp3"
+  sourceUrl: "https://storage.gloweyai.com/avatar.mp4"
+  audioUrl: "https://storage.gloweyai.com/narration_spanish.mp3"
   model: "sync-lipsync-v3"
 ```
 

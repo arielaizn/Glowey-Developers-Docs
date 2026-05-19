@@ -54,10 +54,10 @@ export default function HomePage() {
       >
         <GloweyLogo />
         <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', fontSize: '0.875rem', color: 'var(--color-fd-muted-foreground)' }}>
-          <a href="https://glowey.app" target="_blank" rel="noopener noreferrer" className="text-fd-muted-foreground hover:text-fd-foreground" style={{ transition: 'color 0.15s' }}>
+          <a href="https://gloweyai.com" target="_blank" rel="noopener noreferrer" className="text-fd-muted-foreground hover:text-fd-foreground" style={{ transition: 'color 0.15s' }}>
             Main Site
           </a>
-          <a href="https://glowey.app/me" target="_blank" rel="noopener noreferrer" className="text-fd-muted-foreground hover:text-fd-foreground" style={{ transition: 'color 0.15s' }}>
+          <a href="https://gloweyai.com/me" target="_blank" rel="noopener noreferrer" className="text-fd-muted-foreground hover:text-fd-foreground" style={{ transition: 'color 0.15s' }}>
             App
           </a>
           <a
@@ -239,8 +239,8 @@ export default function HomePage() {
         <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '1rem' }}>Get started in 60 seconds</h2>
         <p style={{ color: 'var(--color-fd-muted-foreground)', marginBottom: '1.5rem' }}>
           Grab a token from{' '}
-          <a href="https://glowey.app/me/settings" style={{ textDecoration: 'underline', color: 'inherit', transition: 'color 0.15s' }}>
-            glowey.app/me/settings
+          <a href="https://gloweyai.com/me/settings" style={{ textDecoration: 'underline', color: 'inherit', transition: 'color 0.15s' }}>
+            gloweyai.com/me/settings
           </a>{' '}
           and run your first request:
         </p>
@@ -263,7 +263,7 @@ export default function HomePage() {
             <span style={{ marginLeft: '0.5rem' }}>bash</span>
           </div>
           <pre style={{ padding: '1rem', fontSize: '0.875rem', overflowX: 'auto', backgroundColor: 'var(--color-fd-background)' }}>
-            <code>{`curl -X POST https://glowey.app/api/generate \\
+            <code>{`curl -X POST https://gloweyai.com/api/generate \\
   -H "Authorization: Bearer glow_sk_YOUR_TOKEN_HERE" \\
   -H "Content-Type: application/json" \\
   -d '{
@@ -314,7 +314,7 @@ export default function HomePage() {
             </div>
           </a>
           <a
-            href="mailto:api@glowey.app"
+            href="mailto:api@gloweyai.com"
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -330,7 +330,7 @@ export default function HomePage() {
           >
             <div>
               <div style={{ fontWeight: 600, marginBottom: '0.25rem' }}>Email Support</div>
-              <div style={{ fontSize: '0.875rem', color: 'var(--color-fd-muted-foreground)' }}>api@glowey.app</div>
+              <div style={{ fontSize: '0.875rem', color: 'var(--color-fd-muted-foreground)' }}>api@gloweyai.com</div>
             </div>
           </a>
         </div>

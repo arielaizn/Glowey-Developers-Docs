@@ -59,7 +59,7 @@ Example: FLUX Pro @ 1K = 15 credits.
 ### Example Request
 
 ```bash
-curl -X POST https://glowey.app/api/generate \
+curl -X POST https://gloweyai.com/api/generate \
   -H "Authorization: Bearer glow_sk_YOUR_TOKEN_HERE" \
   -H "Content-Type: application/json" \
   -d '{
@@ -116,7 +116,7 @@ Bearer token required.
   "output": {
     "images": [
       {
-        "url": "https://storage.glowey.app/...",
+        "url": "https://storage.gloweyai.com/...",
         "seed": 12345
       }
     ]
@@ -146,7 +146,7 @@ If failed, any remaining credits are refunded.
 ### Example Request
 
 ```bash
-curl "https://glowey.app/api/generate/status?taskId=task_8f3e9a2b" \
+curl "https://gloweyai.com/api/generate/status?taskId=task_8f3e9a2b" \
   -H "Authorization: Bearer glow_sk_YOUR_TOKEN_HERE"
 ```
 

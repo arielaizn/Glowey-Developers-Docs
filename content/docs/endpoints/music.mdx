@@ -32,7 +32,7 @@ Bearer token required.
 | `styleWeight` | number | No | Style strength: 0-1. Default: 0.7 |
 | `weirdnessConstraint` | number | No | Creativity limit: 0-1. Higher = more experimental. Default: 0.5 |
 | `audioWeight` | number | No | Audio reference strength: 0-1 (when using audio reference) |
-| `personaId` | string | No | Persona ID (V5/V5_5 only). Available from glowey.app/me/suno |
+| `personaId` | string | No | Persona ID (V5/V5_5 only). Available from gloweyai.com/me/suno |
 | `personaModel` | string | No | Persona voice model: `V5` or `V5_5` |
 
 ### Response
@@ -66,7 +66,7 @@ Fixed per model version. See [Credits & Pricing](/docs/credits-and-pricing#music
 ### Example Request (Simple Mode)
 
 ```bash
-curl -X POST https://glowey.app/api/audio/music \
+curl -X POST https://gloweyai.com/api/audio/music \
   -H "Authorization: Bearer glow_sk_YOUR_TOKEN_HERE" \
   -H "Content-Type: application/json" \
   -d '{
@@ -78,7 +78,7 @@ curl -X POST https://glowey.app/api/audio/music \
 ### Example Request (Custom Mode)
 
 ```bash
-curl -X POST https://glowey.app/api/audio/music \
+curl -X POST https://gloweyai.com/api/audio/music \
   -H "Authorization: Bearer glow_sk_YOUR_TOKEN_HERE" \
   -H "Content-Type: application/json" \
   -d '{
@@ -135,8 +135,8 @@ Bearer token required.
   "state": "success",
   "taskId": "task_mus890ghi",
   "output": {
-    "audio_url": "https://storage.glowey.app/music_xyz789.mp3",
-    "cover_image_url": "https://storage.glowey.app/cover_xyz789.jpg"
+    "audio_url": "https://storage.gloweyai.com/music_xyz789.mp3",
+    "cover_image_url": "https://storage.gloweyai.com/cover_xyz789.jpg"
   }
 }
 ```
@@ -161,7 +161,7 @@ Bearer token required.
 ### Example Request
 
 ```bash
-curl "https://glowey.app/api/audio/music/status?taskId=task_mus890ghi" \
+curl "https://gloweyai.com/api/audio/music/status?taskId=task_mus890ghi" \
   -H "Authorization: Bearer glow_sk_YOUR_TOKEN_HERE"
 ```
 

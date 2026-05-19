@@ -29,7 +29,7 @@ Bearer token required.
 ```json
 {
   "success": true,
-  "audioUrls": ["https://storage.glowey.app/sfx_xyz789.mp3"]
+  "audioUrls": ["https://storage.gloweyai.com/sfx_xyz789.mp3"]
 }
 ```
 
@@ -49,7 +49,7 @@ Bearer token required.
 ### Example Request
 
 ```bash
-curl -X POST https://glowey.app/api/audio/sfx \
+curl -X POST https://gloweyai.com/api/audio/sfx \
   -H "Authorization: Bearer glow_sk_YOUR_TOKEN_HERE" \
   -H "Content-Type: application/json" \
   -d '{
@@ -63,7 +63,7 @@ curl -X POST https://glowey.app/api/audio/sfx \
 ```json
 {
   "success": true,
-  "audioUrls": ["https://storage.glowey.app/sfx_xyz789.mp3"]
+  "audioUrls": ["https://storage.gloweyai.com/sfx_xyz789.mp3"]
 }
 ```
 
@@ -116,7 +116,7 @@ Bearer token required.
 ### Example Request
 
 ```bash
-curl -X POST https://glowey.app/api/audio/clone \
+curl -X POST https://gloweyai.com/api/audio/clone \
   -H "Authorization: Bearer glow_sk_YOUR_TOKEN_HERE" \
   -H "Content-Type: application/json" \
   -d '{
@@ -169,7 +169,7 @@ Bearer token required.
 ### Example Request
 
 ```bash
-curl -X POST https://glowey.app/api/audio/transcribe \
+curl -X POST https://gloweyai.com/api/audio/transcribe \
   -H "Authorization: Bearer glow_sk_YOUR_TOKEN_HERE" \
   -H "Content-Type: application/json" \
   -d '{
@@ -205,7 +205,7 @@ Bearer token required.
 ```json
 {
   "success": true,
-  "audioUrl": "https://storage.glowey.app/tts_xyz789.mp3"
+  "audioUrl": "https://storage.gloweyai.com/tts_xyz789.mp3"
 }
 ```
 
@@ -224,7 +224,7 @@ Bearer token required.
 ### Example Request
 
 ```bash
-curl -X POST https://glowey.app/api/tts/elevenlabs \
+curl -X POST https://gloweyai.com/api/tts/elevenlabs \
   -H "Authorization: Bearer glow_sk_YOUR_TOKEN_HERE" \
   -H "Content-Type: application/json" \
   -d '{

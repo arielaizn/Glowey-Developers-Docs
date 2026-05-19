@@ -30,7 +30,7 @@ None. Returns the user's full conversation list.
       "title": "Quantum Computing Explainer",
       "workflow": "video+music",
       "prompt": "Create an animated explainer video about quantum computing",
-      "final_video_url": "https://storage.glowey.app/quantum_final.mp4",
+      "final_video_url": "https://storage.gloweyai.com/quantum_final.mp4",
       "created_at": "2025-05-19T10:30:00Z",
       "updated_at": "2025-05-19T10:45:30Z"
     }
@@ -58,7 +58,7 @@ None. Returns the user's full conversation list.
 ### Example Request
 
 ```bash
-curl "https://glowey.app/api/superglow/conversations" \
+curl "https://gloweyai.com/api/superglow/conversations" \
   -H "Authorization: Bearer glow_sk_YOUR_TOKEN_HERE"
 ```
 
@@ -106,7 +106,7 @@ Returns the created conversation record (status 201).
 ### Example Request
 
 ```bash
-curl -X POST https://glowey.app/api/superglow/conversations \
+curl -X POST https://gloweyai.com/api/superglow/conversations \
   -H "Authorization: Bearer glow_sk_YOUR_TOKEN_HERE" \
   -H "Content-Type: application/json" \
   -d '{
@@ -145,18 +145,18 @@ Bearer token required.
   "clips": [
     {
       "id": "clip_001",
-      "imageUrl": "https://storage.glowey.app/clip_001.jpg",
+      "imageUrl": "https://storage.gloweyai.com/clip_001.jpg",
       "duration": 3
     }
   ],
   "media": [
     {
       "type": "image",
-      "url": "https://storage.glowey.app/media_001.jpg"
+      "url": "https://storage.gloweyai.com/media_001.jpg"
     }
   ],
-  "music_url": "https://storage.glowey.app/music_background.mp3",
-  "final_video_url": "https://storage.glowey.app/quantum_final.mp4",
+  "music_url": "https://storage.gloweyai.com/music_background.mp3",
+  "final_video_url": "https://storage.gloweyai.com/quantum_final.mp4",
   "steps": ["generate_images", "generate_video", "generate_music"],
   "created_at": "2025-05-19T10:30:00Z",
   "updated_at": "2025-05-19T10:45:30Z"
@@ -184,7 +184,7 @@ Extended fields returned on GET:
 ### Example Request
 
 ```bash
-curl "https://glowey.app/api/superglow/conversations/conv_19a8b7c6d5e4f" \
+curl "https://gloweyai.com/api/superglow/conversations/conv_19a8b7c6d5e4f" \
   -H "Authorization: Bearer glow_sk_YOUR_TOKEN_HERE"
 ```
 
@@ -242,12 +242,12 @@ Fields allowed for update (all optional):
 ### Example Request
 
 ```bash
-curl -X PATCH https://glowey.app/api/superglow/conversations/conv_19a8b7c6d5e4f \
+curl -X PATCH https://gloweyai.com/api/superglow/conversations/conv_19a8b7c6d5e4f \
   -H "Authorization: Bearer glow_sk_YOUR_TOKEN_HERE" \
   -H "Content-Type: application/json" \
   -d '{
     "title": "Final Quantum Explainer",
-    "final_video_url": "https://storage.glowey.app/quantum_final.mp4"
+    "final_video_url": "https://storage.gloweyai.com/quantum_final.mp4"
   }'
 ```
 
@@ -284,7 +284,7 @@ Bearer token required.
 ### Example Request
 
 ```bash
-curl -X DELETE https://glowey.app/api/superglow/conversations/conv_19a8b7c6d5e4f \
+curl -X DELETE https://gloweyai.com/api/superglow/conversations/conv_19a8b7c6d5e4f \
   -H "Authorization: Bearer glow_sk_YOUR_TOKEN_HERE"
 ```
 
@@ -322,7 +322,7 @@ Same as PATCH — any conversation fields to update.
 
 ```javascript
 navigator.sendBeacon(
-  `https://glowey.app/api/superglow/conversations/conv_19a8b7c6d5e4f/beacon`,
+  `https://gloweyai.com/api/superglow/conversations/conv_19a8b7c6d5e4f/beacon`,
   JSON.stringify({
     title: "Unsaved Work",
     script_text: "Current script state...",

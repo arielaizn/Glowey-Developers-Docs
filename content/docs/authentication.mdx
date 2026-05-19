@@ -9,7 +9,7 @@ All Glowey API calls require a Bearer token in the `Authorization` header.
 
 ## Token Format
 
-Tokens are created in [glowey.app/me/settings](https://glowey.app/me/settings) and follow the format:
+Tokens are created in [gloweyai.com/me/settings](https://gloweyai.com/me/settings) and follow the format:
 
 ```
 glow_sk_<32 random characters>
@@ -28,14 +28,14 @@ Include the token in the `Authorization` header of every request:
 
 ```bash
 curl -H "Authorization: Bearer glow_sk_YOUR_TOKEN_HERE" \
-  https://glowey.app/api/generate \
+  https://gloweyai.com/api/generate \
   ...
 ```
 
 Or in code:
 
 ```javascript
-fetch('https://glowey.app/api/generate', {
+fetch('https://gloweyai.com/api/generate', {
   method: 'POST',
   headers: {
     'Authorization': 'Bearer glow_sk_YOUR_TOKEN_HERE',
@@ -55,7 +55,7 @@ fetch('https://glowey.app/api/generate', {
 
 You can manage tokens only via the browser (not the API):
 
-- **Create:** [glowey.app/me/settings](https://glowey.app/me/settings) → Developer API → Create token
+- **Create:** [gloweyai.com/me/settings](https://gloweyai.com/me/settings) → Developer API → Create token
 - **View:** Lists prefix + last used date (full secret never stored)
 - **Revoke:** Revoked tokens immediately reject all requests
 

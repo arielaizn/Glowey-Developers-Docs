@@ -68,7 +68,7 @@ Example: Seedance 2.0 Fast, 5s, 720p = (12 + 5x3) x 1.25 = 57 credits.
 ### Example Request
 
 ```bash
-curl -X POST https://glowey.app/api/video/generate \
+curl -X POST https://gloweyai.com/api/video/generate \
   -H "Authorization: Bearer glow_sk_YOUR_TOKEN_HERE" \
   -H "Content-Type: application/json" \
   -d '{
@@ -124,8 +124,8 @@ Bearer token required.
   "state": "success",
   "taskId": "task_h4i5j6k7",
   "output": {
-    "video_url": "https://storage.glowey.app/video_xyz789.mp4",
-    "cover_image_url": "https://storage.glowey.app/cover_xyz789.jpg"
+    "video_url": "https://storage.gloweyai.com/video_xyz789.mp4",
+    "cover_image_url": "https://storage.gloweyai.com/cover_xyz789.jpg"
   }
 }
 ```
@@ -150,7 +150,7 @@ Bearer token required.
 ### Example Request
 
 ```bash
-curl "https://glowey.app/api/video/status?taskId=task_h4i5j6k7" \
+curl "https://gloweyai.com/api/video/status?taskId=task_h4i5j6k7" \
   -H "Authorization: Bearer glow_sk_YOUR_TOKEN_HERE"
 ```
 

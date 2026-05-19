@@ -12,7 +12,7 @@ Quick command-line examples using `curl`.
 ```bash
 # Set your token for reuse
 TOKEN="glow_sk_YOUR_TOKEN_HERE"
-BASE_URL="https://glowey.app/api"
+BASE_URL="https://gloweyai.com/api"
 ```
 
 ---
@@ -22,7 +22,7 @@ BASE_URL="https://glowey.app/api"
 ### Submit
 
 ```bash
-curl -X POST https://glowey.app/api/generate \
+curl -X POST https://gloweyai.com/api/generate \
   -H "Authorization: Bearer glow_sk_YOUR_TOKEN_HERE" \
   -H "Content-Type: application/json" \
   -d '{
@@ -44,7 +44,7 @@ Response:
 ### Check Status
 
 ```bash
-curl https://glowey.app/api/generate/status?taskId=task_abc123xyz \
+curl https://gloweyai.com/api/generate/status?taskId=task_abc123xyz \
   -H "Authorization: Bearer glow_sk_YOUR_TOKEN_HERE"
 ```
 
@@ -56,7 +56,7 @@ Response (success):
   "output": {
     "images": [
       {
-        "url": "https://storage.glowey.app/image_xyz789.jpg",
+        "url": "https://storage.gloweyai.com/image_xyz789.jpg",
         "seed": 12345
       }
     ]
@@ -71,7 +71,7 @@ Response (success):
 ### Submit
 
 ```bash
-curl -X POST https://glowey.app/api/video/generate \
+curl -X POST https://gloweyai.com/api/video/generate \
   -H "Authorization: Bearer glow_sk_YOUR_TOKEN_HERE" \
   -H "Content-Type: application/json" \
   -d '{
@@ -93,7 +93,7 @@ Response:
 ### Check Status
 
 ```bash
-curl https://glowey.app/api/video/status?taskId=task_vid789 \
+curl https://gloweyai.com/api/video/status?taskId=task_vid789 \
   -H "Authorization: Bearer glow_sk_YOUR_TOKEN_HERE"
 ```
 
@@ -102,7 +102,7 @@ curl https://glowey.app/api/video/status?taskId=task_vid789 \
 ## Chat (Streaming SSE)
 
 ```bash
-curl -X POST https://glowey.app/api/chat \
+curl -X POST https://gloweyai.com/api/chat \
   -H "Authorization: Bearer glow_sk_YOUR_TOKEN_HERE" \
   -H "Content-Type: application/json" \
   -d '{
@@ -126,7 +126,7 @@ data: [DONE]
 To parse and print nicely:
 
 ```bash
-curl -s -X POST https://glowey.app/api/chat \
+curl -s -X POST https://gloweyai.com/api/chat \
   -H "Authorization: Bearer glow_sk_YOUR_TOKEN_HERE" \
   -H "Content-Type: application/json" \
   -d '{
@@ -142,7 +142,7 @@ curl -s -X POST https://glowey.app/api/chat \
 ### Submit
 
 ```bash
-curl -X POST https://glowey.app/api/audio/music \
+curl -X POST https://gloweyai.com/api/audio/music \
   -H "Authorization: Bearer glow_sk_YOUR_TOKEN_HERE" \
   -H "Content-Type: application/json" \
   -d '{
@@ -162,7 +162,7 @@ Response:
 ### Check Status
 
 ```bash
-curl https://glowey.app/api/audio/music/status?taskId=task_mus890 \
+curl https://gloweyai.com/api/audio/music/status?taskId=task_mus890 \
   -H "Authorization: Bearer glow_sk_YOUR_TOKEN_HERE"
 ```
 
@@ -171,7 +171,7 @@ curl https://glowey.app/api/audio/music/status?taskId=task_mus890 \
 ## Sound Effects
 
 ```bash
-curl -X POST https://glowey.app/api/audio/sfx \
+curl -X POST https://gloweyai.com/api/audio/sfx \
   -H "Authorization: Bearer glow_sk_YOUR_TOKEN_HERE" \
   -H "Content-Type: application/json" \
   -d '{
@@ -184,7 +184,7 @@ Response:
 ```json
 {
   "success": true,
-  "audioUrls": ["https://storage.glowey.app/sfx_xyz789.mp3"]
+  "audioUrls": ["https://storage.gloweyai.com/sfx_xyz789.mp3"]
 }
 ```
 
@@ -195,7 +195,7 @@ Response:
 ### Submit
 
 ```bash
-curl -X POST https://glowey.app/api/lipsync/generate \
+curl -X POST https://gloweyai.com/api/lipsync/generate \
   -H "Authorization: Bearer glow_sk_YOUR_TOKEN_HERE" \
   -H "Content-Type: application/json" \
   -d '{
@@ -208,7 +208,7 @@ curl -X POST https://glowey.app/api/lipsync/generate \
 ### Check Status
 
 ```bash
-curl "https://glowey.app/api/lipsync/status?taskId=task_lip789&modelId=sync-lipsync-v2" \
+curl "https://gloweyai.com/api/lipsync/status?taskId=task_lip789&modelId=sync-lipsync-v2" \
   -H "Authorization: Bearer glow_sk_YOUR_TOKEN_HERE"
 ```
 
@@ -219,7 +219,7 @@ curl "https://glowey.app/api/lipsync/status?taskId=task_lip789&modelId=sync-lips
 ### Enhance
 
 ```bash
-curl -X POST https://glowey.app/api/edit \
+curl -X POST https://gloweyai.com/api/edit \
   -H "Authorization: Bearer glow_sk_YOUR_TOKEN_HERE" \
   -H "Content-Type: application/json" \
   -d '{
@@ -231,7 +231,7 @@ curl -X POST https://glowey.app/api/edit \
 ### Remove Background
 
 ```bash
-curl -X POST https://glowey.app/api/edit \
+curl -X POST https://gloweyai.com/api/edit \
   -H "Authorization: Bearer glow_sk_YOUR_TOKEN_HERE" \
   -H "Content-Type: application/json" \
   -d '{
@@ -243,7 +243,7 @@ curl -X POST https://glowey.app/api/edit \
 ### Inpaint
 
 ```bash
-curl -X POST https://glowey.app/api/edit \
+curl -X POST https://gloweyai.com/api/edit \
   -H "Authorization: Bearer glow_sk_YOUR_TOKEN_HERE" \
   -H "Content-Type: application/json" \
   -d '{
@@ -257,7 +257,7 @@ curl -X POST https://glowey.app/api/edit \
 ### Check Edit Status
 
 ```bash
-curl https://glowey.app/api/edit/status?taskId=task_edit_xyz789 \
+curl https://gloweyai.com/api/edit/status?taskId=task_edit_xyz789 \
   -H "Authorization: Bearer glow_sk_YOUR_TOKEN_HERE"
 ```
 
@@ -268,7 +268,7 @@ curl https://glowey.app/api/edit/status?taskId=task_edit_xyz789 \
 ### Create Token
 
 ```bash
-curl -X POST https://glowey.app/api/user/tokens \
+curl -X POST https://gloweyai.com/api/user/tokens \
   -H "Cookie: auth_token=YOUR_SESSION_COOKIE" \
   -H "Content-Type: application/json" \
   -d '{"name": "My CLI Token"}'
@@ -279,14 +279,14 @@ Note: Must use browser session cookie, not a dev token.
 ### List Tokens
 
 ```bash
-curl https://glowey.app/api/user/tokens \
+curl https://gloweyai.com/api/user/tokens \
   -H "Cookie: auth_token=YOUR_SESSION_COOKIE"
 ```
 
 ### Revoke Token
 
 ```bash
-curl -X DELETE https://glowey.app/api/user/tokens/token_id_here \
+curl -X DELETE https://gloweyai.com/api/user/tokens/token_id_here \
   -H "Cookie: auth_token=YOUR_SESSION_COOKIE"
 ```
 
@@ -302,7 +302,7 @@ TASK_ID="task_abc123xyz"
 
 echo "Polling for completion..."
 while true; do
-  STATUS=$(curl -s "https://glowey.app/api/generate/status?taskId=$TASK_ID" \
+  STATUS=$(curl -s "https://gloweyai.com/api/generate/status?taskId=$TASK_ID" \
     -H "Authorization: Bearer $TOKEN" | jq -r '.state')
   
   echo "Status: $STATUS"
@@ -315,7 +315,7 @@ while true; do
 done
 
 # Get the final result
-curl -s "https://glowey.app/api/generate/status?taskId=$TASK_ID" \
+curl -s "https://gloweyai.com/api/generate/status?taskId=$TASK_ID" \
   -H "Authorization: Bearer $TOKEN" | jq '.output.images[0].url'
 ```
 
@@ -327,14 +327,14 @@ curl -s "https://glowey.app/api/generate/status?taskId=$TASK_ID" \
 
 ```bash
 curl -w "\nHTTP Status: %{http_code}\n" \
-  https://glowey.app/api/generate \
+  https://gloweyai.com/api/generate \
   -H "Authorization: Bearer glow_sk_YOUR_TOKEN_HERE"
 ```
 
 ### Insufficient Credits (402)
 
 ```bash
-curl -X POST https://glowey.app/api/generate \
+curl -X POST https://gloweyai.com/api/generate \
   -H "Authorization: Bearer glow_sk_YOUR_TOKEN_HERE" \
   -H "Content-Type: application/json" \
   -d '{"modelId":"flux-pro","prompt":"a cat"}' 2>/dev/null | jq '.'
@@ -351,7 +351,7 @@ curl -X POST https://glowey.app/api/generate \
 
 ```bash
 # Get Retry-After header
-curl -i -X POST https://glowey.app/api/generate \
+curl -i -X POST https://gloweyai.com/api/generate \
   -H "Authorization: Bearer glow_sk_YOUR_TOKEN_HERE" \
   -d '{"modelId":"flux-pro","prompt":"a cat"}' 2>/dev/null | grep Retry-After
 

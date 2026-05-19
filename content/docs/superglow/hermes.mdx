@@ -50,7 +50,7 @@ Bearer token required.
 ### Example Request
 
 ```bash
-curl -X POST https://glowey.app/api/superglow/hermes \
+curl -X POST https://gloweyai.com/api/superglow/hermes \
   -H "Authorization: Bearer glow_sk_YOUR_TOKEN_HERE" \
   -H "Content-Type: application/json" \
   -d '{
@@ -121,7 +121,7 @@ Server-Sent Events (SSE) with the following event types:
   "payload": {
     "toolName": "generate_image",
     "result": {
-      "image_url": "https://storage.glowey.app/img_abc123.jpg",
+      "image_url": "https://storage.gloweyai.com/img_abc123.jpg",
       "taskId": "task_xyz789"
     }
   }
@@ -135,7 +135,7 @@ Server-Sent Events (SSE) with the following event types:
   "type": "done",
   "payload": {
     "reason": "stop",
-    "finalVideoUrl": "https://storage.glowey.app/video_final.mp4",
+    "finalVideoUrl": "https://storage.gloweyai.com/video_final.mp4",
     "conversationId": "conv_19a8b7c6d5e4f"
   }
 }
@@ -160,7 +160,7 @@ Server-Sent Events (SSE) with the following event types:
 ### Example Request
 
 ```bash
-curl "https://glowey.app/api/superglow/hermes/stream?jobId=job_f8e7d6c5b4a3" \
+curl "https://gloweyai.com/api/superglow/hermes/stream?jobId=job_f8e7d6c5b4a3" \
   -H "Authorization: Bearer glow_sk_YOUR_TOKEN_HERE" \
   -N  # unbuffered output
 ```
@@ -172,15 +172,15 @@ data: {"type":"text","payload":"I'll create a quantum computing explainer video.
 
 data: {"type":"tool_call","payload":{"toolName":"generate_image","params":{"prompt":"quantum superposition visualization","taskId":"task_8a9b0c1d"}}}
 
-data: {"type":"tool_result","payload":{"toolName":"generate_image","result":{"image_url":"https://storage.glowey.app/quantum_viz_001.jpg","taskId":"task_8a9b0c1d"}}}
+data: {"type":"tool_result","payload":{"toolName":"generate_image","result":{"image_url":"https://storage.gloweyai.com/quantum_viz_001.jpg","taskId":"task_8a9b0c1d"}}}
 
 data: {"type":"text","payload":"Now creating the video animation..."}
 
-data: {"type":"tool_call","payload":{"toolName":"generate_video","params":{"prompt":"animated quantum tunneling effect","refImageUrl":"https://storage.glowey.app/quantum_viz_001.jpg","taskId":"task_2c3d4e5f"}}}
+data: {"type":"tool_call","payload":{"toolName":"generate_video","params":{"prompt":"animated quantum tunneling effect","refImageUrl":"https://storage.gloweyai.com/quantum_viz_001.jpg","taskId":"task_2c3d4e5f"}}}
 
-data: {"type":"tool_result","payload":{"toolName":"generate_video","result":{"video_url":"https://storage.glowey.app/quantum_video.mp4","taskId":"task_2c3d4e5f"}}}
+data: {"type":"tool_result","payload":{"toolName":"generate_video","result":{"video_url":"https://storage.gloweyai.com/quantum_video.mp4","taskId":"task_2c3d4e5f"}}}
 
-data: {"type":"done","payload":{"reason":"stop","finalVideoUrl":"https://storage.glowey.app/quantum_video.mp4","conversationId":"conv_19a8b7c6d5e4f"}}
+data: {"type":"done","payload":{"reason":"stop","finalVideoUrl":"https://storage.gloweyai.com/quantum_video.mp4","conversationId":"conv_19a8b7c6d5e4f"}}
 ```
 
 ### Client-Side Streaming
@@ -190,7 +190,7 @@ JavaScript example using EventSource:
 ```javascript
 const jobId = "job_f8e7d6c5b4a3";
 const eventSource = new EventSource(
-  `https://glowey.app/api/superglow/hermes/stream?jobId=${jobId}`,
+  `https://gloweyai.com/api/superglow/hermes/stream?jobId=${jobId}`,
   { headers: { Authorization: "Bearer glow_sk_YOUR_TOKEN_HERE" } }
 );
 
@@ -215,7 +215,7 @@ eventSource.onerror = (error) => {
 Use the `conversation_id` from the initial POST response to continue a conversation:
 
 ```bash
-curl -X POST https://glowey.app/api/superglow/hermes \
+curl -X POST https://gloweyai.com/api/superglow/hermes \
   -H "Authorization: Bearer glow_sk_YOUR_TOKEN_HERE" \
   -H "Content-Type: application/json" \
   -d '{

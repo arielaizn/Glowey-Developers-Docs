@@ -1,6 +1,6 @@
 # Glowey Developer API Docs
 
-Documentation site for the [Glowey](https://glowey.app) Developer API — the all-in-one AI creative platform.
+Documentation site for the [Glowey](https://gloweyai.com) Developer API — the all-in-one AI creative platform.
 
 Built with [Fumadocs](https://fumadocs.vercel.app) on Next.js + Tailwind CSS v4.
 
@@ -62,12 +62,12 @@ content/docs/
 
 ## API Base URL
 
-All Glowey API endpoints are at `https://glowey.app/api/`.
+All Glowey API endpoints are at `https://gloweyai.com/api/`.
 
-Get a token at [glowey.app/me/settings](https://glowey.app/me/settings) → Developer API.
+Get a token at [gloweyai.com/me/settings](https://gloweyai.com/me/settings) → Developer API.
 
 ## Links
 
-- [Glowey App](https://glowey.app)
-- [API Settings](https://glowey.app/me/settings)
+- [Glowey App](https://gloweyai.com)
+- [API Settings](https://gloweyai.com/me/settings)
 - [GitHub Issues](https://github.com/arielaizn/Glowey-Developers-Docs/issues)

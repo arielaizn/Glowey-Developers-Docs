@@ -58,7 +58,7 @@ Fixed per model. See [Credits & Pricing](/docs/credits-and-pricing#lipsync).
 ### Example Request
 
 ```bash
-curl -X POST https://glowey.app/api/lipsync/generate \
+curl -X POST https://gloweyai.com/api/lipsync/generate \
   -H "Authorization: Bearer glow_sk_YOUR_TOKEN_HERE" \
   -H "Content-Type: application/json" \
   -d '{
@@ -111,7 +111,7 @@ Bearer token required.
   "state": "success",
   "taskId": "task_lip789def",
   "output": {
-    "video_url": "https://storage.glowey.app/lipsync_xyz789.mp4"
+    "video_url": "https://storage.gloweyai.com/lipsync_xyz789.mp4"
   }
 }
 ```
@@ -136,7 +136,7 @@ Bearer token required.
 ### Example Request
 
 ```bash
-curl "https://glowey.app/api/lipsync/status?taskId=task_lip789def&modelId=sync-lipsync-v2" \
+curl "https://gloweyai.com/api/lipsync/status?taskId=task_lip789def&modelId=sync-lipsync-v2" \
   -H "Authorization: Bearer glow_sk_YOUR_TOKEN_HERE"
 ```
 

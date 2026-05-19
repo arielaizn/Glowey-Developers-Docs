@@ -67,7 +67,7 @@ If `preferredModel` is set, SuperGlow sticks to that model and does not attempt 
 ### Example Request
 
 ```bash
-curl -X POST https://glowey.app/api/superglow/generate \
+curl -X POST https://gloweyai.com/api/superglow/generate \
   -H "Authorization: Bearer glow_sk_YOUR_TOKEN_HERE" \
   -H "Content-Type: application/json" \
   -d '{
@@ -101,7 +101,7 @@ See [Image Generation Status](/docs/endpoints/image#check-generation-status) for
 ### Example Status Check
 
 ```bash
-curl "https://glowey.app/api/generate/status?taskId=task_xyz789abc" \
+curl "https://gloweyai.com/api/generate/status?taskId=task_xyz789abc" \
   -H "Authorization: Bearer glow_sk_YOUR_TOKEN_HERE"
 ```
 
@@ -121,7 +121,7 @@ Response on success:
   "output": {
     "images": [
       {
-        "url": "https://storage.glowey.app/img_xyz789.jpg",
+        "url": "https://storage.gloweyai.com/img_xyz789.jpg",
         "seed": 42
       }
     ]
@@ -156,7 +156,7 @@ If `preferredModel` is specified:
 ### Example with Preferred Model
 
 ```bash
-curl -X POST https://glowey.app/api/superglow/generate \
+curl -X POST https://gloweyai.com/api/superglow/generate \
   -H "Authorization: Bearer glow_sk_YOUR_TOKEN_HERE" \
   -H "Content-Type: application/json" \
   -d '{

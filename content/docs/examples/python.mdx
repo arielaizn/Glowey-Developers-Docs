@@ -19,7 +19,7 @@ pip install requests
 import requests
 
 token = 'glow_sk_YOUR_TOKEN_HERE'
-base_url = 'https://glowey.app/api'
+base_url = 'https://gloweyai.com/api'
 
 headers = {
     'Authorization': f'Bearer {token}',
@@ -37,7 +37,7 @@ pip install httpx
 import httpx
 
 client = httpx.AsyncClient(
-    base_url='https://glowey.app/api',
+    base_url='https://gloweyai.com/api',
     headers={'Authorization': 'Bearer glow_sk_YOUR_TOKEN_HERE'},
 )
 ```
@@ -57,7 +57,7 @@ def generate_image():
     
     # 1. Submit request
     res = requests.post(
-        'https://glowey.app/api/generate',
+        'https://gloweyai.com/api/generate',
         headers={'Authorization': f'Bearer {token}'},
         json={
             'modelId': 'flux-pro',
@@ -78,7 +78,7 @@ def generate_image():
     while True:
         time.sleep(2)
         status_res = requests.get(
-            f'https://glowey.app/api/generate/status?taskId={task_id}',
+            f'https://gloweyai.com/api/generate/status?taskId={task_id}',
             headers={'Authorization': f'Bearer {token}'}
         )
         
@@ -108,7 +108,7 @@ import time
 class GloweyClient:
     def __init__(self, token):
         self.token = token
-        self.base_url = 'https://glowey.app/api'
+        self.base_url = 'https://gloweyai.com/api'
         self.headers = {
             'Authorization': f'Bearer {token}',
             'Content-Type': 'application/json',
@@ -164,7 +164,7 @@ def generate_video():
     
     # Submit
     res = requests.post(
-        'https://glowey.app/api/video/generate',
+        'https://gloweyai.com/api/video/generate',
         headers={'Authorization': f'Bearer {token}'},
         json={
             'modelId': 'seedance-2-fast',
@@ -181,7 +181,7 @@ def generate_video():
     while True:
         time.sleep(5)
         status = requests.get(
-            f'https://glowey.app/api/video/status?taskId={task_id}',
+            f'https://gloweyai.com/api/video/status?taskId={task_id}',
             headers={'Authorization': f'Bearer {token}'}
         ).json()
         
@@ -205,7 +205,7 @@ def chat_stream():
     token = 'glow_sk_YOUR_TOKEN_HERE'
     
     res = requests.post(
-        'https://glowey.app/api/chat',
+        'https://gloweyai.com/api/chat',
         headers={'Authorization': f'Bearer {token}'},
         json={
             'model': 'claude-opus-4-7',
@@ -246,7 +246,7 @@ def generate_music():
     
     # Submit
     res = requests.post(
-        'https://glowey.app/api/audio/music',
+        'https://gloweyai.com/api/audio/music',
         headers={'Authorization': f'Bearer {token}'},
         json={
             'prompt': 'upbeat electronic dance track with synthesizers',
@@ -262,7 +262,7 @@ def generate_music():
     while True:
         time.sleep(10)
         status = requests.get(
-            f'https://glowey.app/api/audio/music/status?taskId={task_id}',
+            f'https://gloweyai.com/api/audio/music/status?taskId={task_id}',
             headers={'Authorization': f'Bearer {token}'}
         ).json()
         
@@ -286,7 +286,7 @@ def generate_sfx():
     token = 'glow_sk_YOUR_TOKEN_HERE'
     
     res = requests.post(
-        'https://glowey.app/api/audio/sfx',
+        'https://gloweyai.com/api/audio/sfx',
         headers={'Authorization': f'Bearer {token}'},
         json={
             'text': 'heavy door slamming followed by three gunshots',
@@ -348,7 +348,7 @@ def request_with_retry(url, method='POST', json=None, max_retries=3, token=None)
 
 # Usage
 res = request_with_retry(
-    'https://glowey.app/api/generate',
+    'https://gloweyai.com/api/generate',
     json={'modelId': 'flux-pro', 'prompt': 'a cat'},
     token='glow_sk_YOUR_TOKEN_HERE'
 )
@@ -364,7 +364,7 @@ import asyncio
 
 async def generate_image_async():
     async with httpx.AsyncClient(
-        base_url='https://glowey.app/api',
+        base_url='https://gloweyai.com/api',
         headers={'Authorization': 'Bearer glow_sk_YOUR_TOKEN_HERE'},
     ) as client:
         # Submit
@@ -404,7 +404,7 @@ import json
 
 async def chat_stream_async():
     async with httpx.AsyncClient(
-        base_url='https://glowey.app/api',
+        base_url='https://gloweyai.com/api',
         headers={'Authorization': 'Bearer glow_sk_YOUR_TOKEN_HERE'},
     ) as client:
         async with client.stream(

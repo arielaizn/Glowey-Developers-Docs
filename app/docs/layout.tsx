@@ -14,13 +14,13 @@ export default function Layout({ children }: { children: ReactNode }) {
         {
           type: 'main',
           text: 'Main Site',
-          url: 'https://glowey.app',
+          url: 'https://gloweyai.com',
           external: true,
         },
         {
           type: 'main',
           text: 'App',
-          url: 'https://glowey.app/me',
+          url: 'https://gloweyai.com/me',
           external: true,
         },
         {
