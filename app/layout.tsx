@@ -1,8 +1,19 @@
 import type { ReactNode } from 'react';
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { RootProvider } from 'fumadocs-ui/provider';
 import { Inter } from 'next/font/google';
 import './global.css';
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  // Allow user pinch-zoom for accessibility; never lock it down.
+  maximumScale: 5,
+  themeColor: [
+    { media: '(prefers-color-scheme: dark)',  color: '#030407' },
+    { media: '(prefers-color-scheme: light)', color: '#ffffff' },
+  ],
+};
 
 const inter = Inter({ subsets: ['latin'] });
 
