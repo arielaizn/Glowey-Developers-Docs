@@ -57,7 +57,7 @@ export default function HomePage() {
           <a href="https://gloweyai.com" target="_blank" rel="noopener noreferrer" className="text-fd-muted-foreground hover:text-fd-foreground" style={{ transition: 'color 0.15s' }}>
             Main Site
           </a>
-          <a href="https://gloweyai.com/me" target="_blank" rel="noopener noreferrer" className="text-fd-muted-foreground hover:text-fd-foreground" style={{ transition: 'color 0.15s' }}>
+          <a href="https://gloweyai.com/me/settings" target="_blank" rel="noopener noreferrer" className="text-fd-muted-foreground hover:text-fd-foreground" style={{ transition: 'color 0.15s' }}>
             App
           </a>
           <a

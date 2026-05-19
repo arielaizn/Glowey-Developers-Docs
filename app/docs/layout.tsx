@@ -20,7 +20,7 @@ export default function Layout({ children }: { children: ReactNode }) {
         {
           type: 'main',
           text: 'App',
-          url: 'https://gloweyai.com/me',
+          url: 'https://gloweyai.com/me/settings',
           external: true,
         },
         {
